@@ -1,0 +1,23 @@
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+.btn-secondary {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    margin: 0 5px;
+}
+
+.calendar-popup {
+    position: absolute;
+    z-index: 9999;
+    display: none; /* Hide calendar by default */
+}
+
+input[type="text"] {
+    width: 150px;
+    padding: 5px;
+    text-align: center;
+}
