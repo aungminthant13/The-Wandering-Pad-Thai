@@ -1,0 +1,44 @@
+{% extends "itinerary/base.html" %} 
+{% block title %}Recommended Places{%endblock %} 
+{% block content %}
+
+<!-- navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <a href="{% url 'home' %}">
+      <span class="logo-text">The Wandering Pad Thai</span>
+    </a>
+  </div>
+
+  <button class="cancel-trip-btn" id="cancelTrip">Cancel</button>
+</nav>
+
+<section class="trip-form-section">
+
+    <h1>Recommended Places for Your Trip</h1>
+    <button onclick="loadRecommendedPlaces()">Fetch Places</button>
+
+    <p>Trip: {{ itinerary.name }}</p>
+    <ul id="placesList"></ul>
+
+    <script>
+        async function loadRecommendedPlaces() {
+            const tripId = "{{ itinerary.id }}";
+            const response = await fetch(`/itinerary/trip/${tripId}/recommended/api/`);
+            console.log(`Fetching from: /itinerary/trip/${tripId}/recommended/api/`);
+
+            const data = await response.json();
+
+            const placesList = document.getElementById("placesList");
+            placesList.innerHTML = "";
+
+            data.tourist_attractions.forEach(place => {
+                const li = document.createElement("li");
+                li.innerText = `${place.name}`;
+                placesList.appendChild(li);
+            });
+        }
+    </script>
+
+</section>
+{% endblock %}

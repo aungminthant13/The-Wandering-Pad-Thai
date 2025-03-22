@@ -1,24 +1,118 @@
 {% extends "home/base.html" %}
-
 {% block title %}Home{% endblock %}
 
 {% block content %}
 
-<body class="bg-gray-100 h-screen flex flex-col">
+<!-- navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <a href="{% url 'home' %}"
+      ><span class="logo-text">The Wandering Pad Thai</span></a
+    >
+  </div>
 
-    <!-- Navbar -->
-    <nav class="bg-blue-600 text-white p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">The Wandering Pad Thai</h1>
-        <a href="{% url 'logout' %}">Logout</a>
-        <span class="text-lg">Hello, {{ user.name }}!</span>
-    </nav>
+  <div class="user-acc">
+    <a href="#" class="user-acc-button">{{ user.name }}</a>
+  </div>
+</nav>
 
-    <!-- Main Content -->
-    <div class="flex flex-grow items-center justify-center">
-        <a href="{% url 'itinerary:create_itin' %}" class="bg-blue-500 text-white text-4xl flex items-center justify-center w-40 h-40 rounded-lg shadow-lg hover:bg-blue-600 transition duration-200">
-            +
-        </a>
+<section class="trip-form-section">
+  <div class="trip-form-section-content">
+    <div class="trip-form">
+
+      <div class="trip-title-section">
+        <div class="label">Title</div>
+        <div class="input-field">
+          <input type="text" id="tripTitle" placeholder="e.g. BKK for Songkran" required>
+        </div>
+      </div>
+
+      <div class="dates-container">
+        <div class="start-date-section">
+          <div class="label">Start Date</div>
+          <div class="input-field">
+            <input type="date" id="startDate" required>
+          </div>
+        </div>
+
+        <div class="return-date-section">
+          <div class="label">Return Date</div>
+          <div class="input-field">
+            <input type="date" id="returnDate" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="trip-duration">
+        <div class="label">Trip Duration</div>
+        <div id="tripDurationValue">0 days</div>
+      </div>
+
     </div>
 
-</body>
+    <button type="submit" class="trip-get-started-btn" id="getStartedBtn">Get started</button>
+  </div>
+</section>
+
+<!-- homepage design -->
+<script src="/static/js/homePage.js"></script>
+
+<!-- send date to server using AJAX -->
+<script>
+  
+  document.getElementById("getStartedBtn").addEventListener("click", function () {
+    let tripTitle = document.getElementById("tripTitle").value;
+    let startDate = document.getElementById("startDate").value;
+    let returnDate = document.getElementById("returnDate").value;
+    let tripDurationText = document.getElementById("tripDurationValue").textContent;
+
+    if (!tripTitle || !startDate || !returnDate || tripDurationText.includes("Please") || tripDurationText.includes("Return date must")) {
+        alert("Please fill in all fields correctly.");
+        return;
+    }
+
+    let tripDuration = parseInt(tripDurationText);
+
+    fetch("/itinerary/create_itinerary/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()  // CSRF protection
+        },
+        body: JSON.stringify({
+            trip_title: tripTitle,
+            start_date: startDate,
+            return_date: returnDate,
+            trip_duration: tripDuration  // Send as integer
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = `/itinerary/recommended_places/${data.trip_id}/`;
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error("Error:", error));
+  });
+
+
+// Function to get CSRF token
+function getCSRFToken() {
+    let cookieValue = null;
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.startsWith("csrftoken=")) {
+            cookieValue = cookie.substring("csrftoken=".length, cookie.length);
+            break;
+        }
+    }
+    return cookieValue;
+}
+
+
+</script>
+
 {% endblock %}

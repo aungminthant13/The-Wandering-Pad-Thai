@@ -1,0 +1,208 @@
+/* Reset some default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+/* Navbar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Logo section */
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+
+.logo-text {
+  font-weight: bold;
+}
+
+/* Your trips button */
+.user-acc-button {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 2px solid #006b71; /* Teal border */
+  border-radius: 25px;
+  color: #006B71;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.user-acc-button:hover {
+  background-color: #006B71;
+  color: white;
+}
+
+/* Make the navbar responsive */
+@media (max-width: 768px) {
+  .navbar {
+      flex-direction: column;
+      gap: 15px;
+  }
+  
+  
+  .user-acc {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+  }
+}
+
+
+/* form section */
+
+.trip-form-section {
+  position: relative;
+  background-color: #fcf9e9; /* Light cream background */
+  padding: 50px 40px 80px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+  /* New styles to center and add border radius */
+  max-width: 95%; /* Width relative to the viewport */
+  margin: 50px auto; /* Top and bottom margin of 50px, auto left and right for centering */
+  border-radius: 30px;
+  overflow: hidden; /* Ensures content respects the border radius */
+}
+
+.trip-form-section-content {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  display: flex;           /* Use flexbox for alignment */
+  flex-direction: column;  /* Stack children vertically */
+  align-items: center;     /* Center children horizontally */
+  justify-content: center; /* Center children vertically */
+}
+
+.text-content {
+  max-width: 550px;
+}
+
+h1 {
+  font-size: 48px;
+  line-height: 1.2;
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+
+.trip-form {
+  background-color: white;
+  border-radius: 12px;
+  border: 2px solid #006b71;
+  margin-bottom: 30px;
+  overflow: hidden;
+  width: 50%;
+  height: 20%;
+}
+
+.trip-title-section {
+  padding: 20px;
+  border-bottom: 1px solid #e1e1e1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#tripTitle:focus {
+  outline: none;
+}
+
+.dates-container {
+  display: flex;
+}
+
+.start-date-section, .return-date-section {
+  padding: 15px 20px;
+  width: 50%;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.start-date-section {
+  border-right: 1px solid #e1e1e1;
+}
+
+.label {
+  font-size: 14px;
+  color: #8bc34a; /* Green color for labels */
+  margin-bottom: 8px;
+}
+
+.input-field {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #333;
+}
+
+.trip-duration {
+  padding: 20px;
+}
+
+.trip-get-started-btn {
+  background-color: #00766c; /* Teal color for button */
+  color: white;
+  border: none;
+  padding: 15px 35px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  justify-content: center;
+  
+}
+
+.trip-get-started-btn:hover {
+  background-color: #005a50;
+}
+
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .travel-planning {
+      padding: 40px 20px 60px;
+  }
+  
+  h1 {
+      font-size: 36px;
+  }
+  
+  .description {
+      font-size: 16px;
+  }
+  
+  .dates-container {
+      flex-direction: column;
+  }
+  
+  .departure-section, .arrival-section {
+      width: 100%;
+  }
+  
+  .departure-section {
+      border-right: none;
+      border-bottom: 1px solid #e1e1e1;
+  }
+}

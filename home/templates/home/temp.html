@@ -1,0 +1,226 @@
+<body class="bg-gray-100 h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">
+          <div class="logo-icon">
+            <a href="{% url 'home' %}"> <img src="static/img/the_wandering_pad_thai.png" style="width:50%;height:100%;"> </a>
+          </div>
+      </div>
+      <div class="nav-links">
+          <a href="{% url 'home' %}" class="active">Home</a>
+          <a href="#"></a>
+          <a href="#">{{ user.name }}</a>
+      </div>
+    </nav>
+  
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title"><span class="highlight">Collaborative</span> trip planning made simple</h1>
+        <p class="hero-description">Share a link with your travel companions and start your travel brainstorming session now — no signup needed.</p>
+        
+        <div class="trip-planner">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="planner-field">
+              <label for="id_title" class="planner-label">Destination</label>
+              {{ form.title|default:'<input type="text" id="id_title" name="title" class="planner-input" placeholder="Where to?">' }}
+            </div>
+            
+            <div class="date-fields">
+              <div class="date-field">
+                <label for="id_start_date" class="planner-label">Takeoff</label>
+                <input type="date" id="id_start_date" name="start_date" class="planner-input" placeholder="--/--/--">
+              </div>
+              <div class="date-field">
+                <label for="id_end_date" class="planner-label">Touchdown</label>
+                <input type="date" id="id_end_date" name="end_date" class="planner-input" placeholder="--/--/--">
+              </div>
+            </div>
+            
+            <!-- Hidden field for days, calculated via JavaScript -->
+            <div class="hidden-field" style="display: none;">
+              <label for="id_days">Days:</label>
+              {{ form.days|default:'<input type="number" id="id_days" name="days" value="1">' }}
+            </div>
+            
+            <button type="submit" class="get-started-btn">Get started</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  
+    <!-- Include Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+    <!-- JavaScript for form handling -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize date pickers
+        flatpickr("#id_start_date", {
+          dateFormat: "Y-m-d",
+          onChange: calculateDays
+        });
+        
+        flatpickr("#id_end_date", {
+          dateFormat: "Y-m-d",
+          onChange: calculateDays
+        });
+        
+        // Calculate days between dates
+        function calculateDays() {
+          const startDate = document.getElementById("id_start_date").value;
+          const endDate = document.getElementById("id_end_date").value;
+          
+          if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const timeDiff = Math.abs(end - start);
+            const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end dates
+            
+            document.getElementById("id_days").value = daysDiff;
+          }
+        }
+      });
+    </script>
+  
+    <style>
+      /* Base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      body {
+        background-color: #fff;
+        color: #333;
+      }
+      
+      /* Navigation */
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      
+      .logo {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
+      
+      .logo-icon {
+        margin-right: 10px;
+      }
+      
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+      }
+      
+      .nav-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+      }
+      
+      .nav-links a.active {
+        color: #008080;
+      }
+      
+      /* Hero section */
+      .hero {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fffbf2;
+        padding: 3rem 2rem;
+        border-radius: 0 0 20px 20px;
+        position: relative;
+        min-height: 500px;
+      }
+      
+      .hero-content {
+        max-width: 600px;
+        text-align: center;
+      }
+      
+      .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+      }
+      
+      .hero-title .highlight {
+        color: #f5a623;
+      }
+      
+      .hero-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        color: #555;
+      }
+      
+      .trip-planner {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+      
+      .planner-field {
+        margin-bottom: 1rem;
+      }
+      
+      .planner-label {
+        display: block;
+        color: #888;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-align: left;
+      }
+      
+      .planner-input {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        color: #555;
+      }
+      
+      .date-fields {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .date-field {
+        flex: 1;
+      }
+      
+      .get-started-btn {
+        background-color: #008080;
+        color: white;
+        border: none;
+        border-radius: 2rem;
+        padding: 1rem 2rem;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+      }
+      
+      .get-started-btn:hover {
+        background-color: #006666;
+      }
+    </style>
+  </body>

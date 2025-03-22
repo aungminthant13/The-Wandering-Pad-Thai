@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Wandering Pad Thai</title>
-    <link rel="stylesheet" href="itinerary/static/css/styles.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>The Wandering Pad Thai: {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/itinerary/css/styles.css" />
+
     <!-- Flatpickr CSS -->
     <link
       rel="stylesheet"
@@ -15,19 +15,10 @@
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   </head>
-  <body class="bg-gray-100">
-    <nav class="bg-white shadow p-4">
-      <div class="max-w-6xl mx-auto flex justify-between">
-        <a href="{% url 'home' %}" class="text-xl font-bold"
-          >The Wandering Pad Thai</a
-        >
-        <div>
-          <a href="{% url 'signup' %}" class="text-blue-500 mx-2">Sign Up</a>
-          <a href="{% url 'login' %}" class="text-green-500 mx-2">Login</a>
-        </div>
-      </div>
-    </nav>
+  <body>
 
-    <div class="container mx-auto p-4">{% block content %}{% endblock %}</div>
+    {% load static %}
+    {% block content %}{% endblock %}
+    
   </body>
 </html>

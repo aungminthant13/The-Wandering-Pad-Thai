@@ -1,0 +1,96 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+/* Navbar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Logo section */
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.logo-text {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    /* text-decoration-style: solid; */
+    font-weight: bold;
+}
+
+/* Ensure the link inside logo has no underline and correct color */
+.logo a {
+  text-decoration: none;  /* Remove underline */
+  color: black; /* Ensure it stays black */
+}
+
+/* Remove visited (purple) link color */
+.logo a:visited {
+  color: black; 
+}
+
+/* Optional: Change color on hover */
+.logo a:hover {
+  color: #007bff; /* Change to blue or any color you want */
+}
+
+/* form section */
+
+.trip-form-section {
+  position: relative;
+  background-color: #fcf9e9; /* Light cream background */
+  padding: 50px 40px 80px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  /* New styles to center and add border radius */
+  max-width: 95%; /* Width relative to the viewport */
+  margin: 50px auto; /* Top and bottom margin of 50px, auto left and right for centering */
+  border-radius: 30px;
+  overflow: hidden; /* Ensures content respects the border radius */
+}
+
+
+h1 {
+  font-size: 48px;
+  line-height: 1.2;
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.cancel-trip-btn {
+    background-color: #00766c; /* Teal color for button */
+    color: white;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    justify-content: center;
+    
+  }
+  
+  .cancel-trip-btn:hover {
+    background-color: #005a50;
+  }
