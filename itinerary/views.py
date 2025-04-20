@@ -42,38 +42,49 @@ def recommended_places(request, trip_id):
     return render(request, 'itinerary/recommended_places.html', {"itinerary": itinerary})
 
 
-MAPQUEST_API_KEY = settings.MAPQUEST_API_KEY
+HERE_API_KEY = settings.HERE_API_KEY
 
 @login_required
 def fetch_recommended_places(request, trip_id):
-    itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+    try:
+        itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+    except Itineraries.DoesNotExist:
+        return JsonResponse({"error": "Itinerary not found"}, status=404)
 
     latitude = 13.7563  # Bangkok
     longitude = 100.5018  # Bangkok
+    radius = 2000  # Search radius in meters
+    api_key = HERE_API_KEY
 
-    url = "https://www.mapquestapi.com/search/v2/radius"
+    url = f"https://discover.search.hereapi.com/v1/discover"
     params = {
-        "key": MAPQUEST_API_KEY,
-        "origin": f"{latitude},{longitude}",
-        "radius": 200,
-        "maxMatches": 20,
+        "apiKey": api_key,
+        "at": f"{latitude},{longitude}",
+        "q": "restaurants",
+        "limit": 20,
+        "lang": "en",
+        "categories": "100-1000-0001"
     }
 
     response = requests.get(url, params=params)
     data = response.json()
 
-    #debug
-    print("MAPQUEST RESPONSE:", data)
+    # Debugging response
+    print("HERE API RESPONSE:", data)
 
     attractions = [
         {
-            "name": place["name"],
-            "lat": place["fields"]["mqap_geography"]["latLng"]["lat"],
-            "lng": place["fields"]["mqap_geography"]["latLng"]["lng"]
+            "name": place["title"],
+            "lat": place["position"]["lat"],
+            "lng": place["position"]["lng"]
         }
-        for place in data["searchResults"]
+        for place in data.get("items", [])
     ]
 
-
     return JsonResponse({"tourist_attractions": attractions})
+
+
+def edit_itinerary(request, trip_id):
+    itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+    return render(request, 'itinerary/edit_itinerary.html', {"itinerary": itinerary})
 

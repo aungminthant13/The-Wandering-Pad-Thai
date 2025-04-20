@@ -135,5 +135,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "user_auth.CustomUser"
 
-MAPQUEST_API_KEY = "yiWeheH6mE28kAqqKvSA6epyVv2HxBfi"
+HERE_API_KEY = "P_vyG58Amepc16HY3v7MIbOjduaQUhz2pZqWTywM86M"
 
