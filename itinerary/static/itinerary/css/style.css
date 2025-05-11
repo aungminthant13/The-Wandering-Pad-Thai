@@ -1,0 +1,247 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Container */
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111;
+}
+
+.date-range {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.toggle-btn {
+    padding: 8px 20px;
+    border: none;
+    background: white;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+    background-color: #4ade80;
+    color: white;
+}
+
+.toggle-btn:hover:not(.active) {
+    background-color: #f0f0f0;
+}
+
+/* Calendar Container */
+.calendar-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+/* Day Column */
+.day-column {
+    min-width: 200px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.day-header {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+    background-color: #fafafa;
+}
+
+.day-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 13px;
+}
+
+.day-content {
+    padding: 12px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Event Card */
+.event-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+.event-card.high-priority {
+    border-left: 3px solid #ff8c00;
+}
+
+.event-title {
+    font-weight: 500;
+    color: #333;
+    font-size: 13px;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.event-time,
+.event-duration {
+    display: flex;
+    align-items: center;
+    color: #666;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.icon {
+    margin-right: 6px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+}
+
+.event-actions {
+    margin-top: 8px;
+}
+
+/* Buttons */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e8e5ff;
+    color: #6b5bff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background-color: #dbd7ff;
+}
+
+.add-card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed #d0d0d0;
+    border-radius: 6px;
+    background: none;
+    color: #6b5bff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: auto;
+}
+
+.add-card-btn:hover {
+    background-color: #f8f8ff;
+    border-color: #6b5bff;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .calendar-container {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 1000px) {
+    .calendar-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 800px) {
+    .calendar-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .calendar-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 400px) {
+    .calendar-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .day-column {
+        min-width: 100%;
+    }
+}
+
+/* Scrollbar Styling */
+.calendar-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}

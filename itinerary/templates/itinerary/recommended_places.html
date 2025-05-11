@@ -1,76 +1,220 @@
-{% extends "itinerary/base.html" %}
-{% block title %}Recommended Places{% endblock %}
-{% block content %}
+{% load static %}
 
-<!-- Navbar -->
-<nav class="navbar">
-  <div class="logo">
-    <a href="{% url 'home' %}">
-      <span class="logo-text">The Wandering Pad Thai</span>
-    </a>
-  </div>
-  <button class="cancel-trip-btn" id="cancelTrip">Cancel</button>
-</nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Planner</title>
+    <link rel="stylesheet" href="{% static 'itinerary/css/style.css' %}">
 
-<section class="trip-form-section">
-    <h1>Recommended Places for Your Trip</h1>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div>
+                <h1 class="title">TEXT</h1>
+                <div class="date-range">Sat, May 10, 2025 → Sat, May 17, 2025</div>
+            </div>
+            <div class="view-toggle">
+                <button class="toggle-btn active">Board</button>
+                <button class="toggle-btn">Map</button>
+            </div>
+        </header>
 
-    <button id="fetchPlacesBtn" onclick="loadRecommendedPlaces()">Fetch Places</button>
-    <p>Trip: {{ itinerary.name }}</p>
+        <main class="calendar-container">
+            <!-- Thursday May 1 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">THU, MAY 1</div>
+                </div>
+                <div class="day-content">
+                    <div class="event-card">
+                        <div class="event-title">Morning Visit to Wat Arun (Temple of Dawn)</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            08:00
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            1.5 h
+                        </div>
+                    </div>
+                    
+                    <button class="add-card-btn">
+                        <span class="icon">+</span>
+                        NEW CARD
+                    </button>
+                </div>
+            </div>
 
-    <div id="loadingMessage" style="display: none;">Loading places...</div>
-    
-    <table id="placesTable" style="width:100%; border-collapse: collapse; display: none;">
-        <thead>
-            <tr>
-                <th style="border: 1px solid black; padding: 8px;">#</th>
-                <th style="border: 1px solid black; padding: 8px;">Name</th>
-                <th style="border: 1px solid black; padding: 8px;">Latitude</th>
-                <th style="border: 1px solid black; padding: 8px;">Longitude</th>
-            </tr>
-        </thead>
-        <tbody id="placesList"></tbody>
-    </table>
+            <!-- Friday May 2 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">FRI, MAY 2</div>
+                </div>
+                <div class="day-content">
+                    <div class="event-card">
+                        <div class="event-title">Explore the Grand Palace and Wat Phra Kaew</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            09:00
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            2 h
+                        </div>
+                        <div class="event-actions">
+                            <button class="action-btn">
+                                <span class="icon">✏️</span>
+                                Click to edit
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="event-card">
+                        <div class="event-title">Lunch and Leisure at Tha Maharaj Pier</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            11:30
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            1.5 h
+                        </div>
+                        <div class="event-actions">
+                            <button class="action-btn">
+                                <span class="icon">✏️</span>
+                                Click to edit
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="add-card-btn">
+                        <span class="icon">+</span>
+                        NEW CARD
+                    </button>
+                </div>
+            </div>
 
-    <script>
-        async function loadRecommendedPlaces() {
-            const tripId = "{{ itinerary.id }}";
-            const placesTable = document.getElementById("placesTable");
-            const placesList = document.getElementById("placesList");
-            const loadingMessage = document.getElementById("loadingMessage");
-            
-            placesTable.style.display = "none"; // Hide table initially
-            loadingMessage.style.display = "block"; // Show loading message
-            
-            try {
-                const response = await fetch(`/itinerary/trip/${tripId}/recommended/api/`);
-                if (!response.ok) {
-                    throw new Error("Failed to fetch places");
-                }
+            <!-- Saturday May 3 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">SAT, MAY 3</div>
+                </div>
+                <div class="day-content">
+                    <div class="event-card">
+                        <div class="event-title">Evening at Asiatique The Riverfront</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            18:30
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            3 h
+                        </div>
+                    </div>
 
-                const data = await response.json();
-                placesList.innerHTML = "";
+                    <button class="action-btn">
+                        <span class="icon">✏️</span>
+                        Click to edit
+                    </button>
 
-                data.tourist_attractions.forEach((place, index) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td style="border: 1px solid black; padding: 8px;">${index + 1}</td>
-                        <td style="border: 1px solid black; padding: 8px;">${place.name}</td>
-                        <td style="border: 1px solid black; padding: 8px;">${place.lat}</td>
-                        <td style="border: 1px solid black; padding: 8px;">${place.lng}</td>
-                    `;
-                    placesList.appendChild(row);
-                });
+                    <div class="event-card">
+                        <div class="event-title">Morning Cultural Tour of Jim Thompson House</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            09:00
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            1.5 h
+                        </div>
+                    </div>
 
-                placesTable.style.display = "table"; // Show table
-            } catch (error) {
-                alert("Error fetching places. Please try again.");
-                console.error(error);
-            } finally {
-                loadingMessage.style.display = "none"; // Hide loading message
-            }
-        }
-    </script>
-</section>
+                    <div class="event-card">
+                        <div class="event-title">Visit Bangkok Art and Culture Centre (BACC)</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            11:30
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            1.5 h
+                        </div>
+                    </div>
 
-{% endblock %}
+                    <button class="action-btn">
+                        <span class="icon">✏️</span>
+                        Click to edit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sunday May 4 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">SUN, MAY 4</div>
+                </div>
+                <div class="day-content">
+                    <div class="event-card high-priority">
+                        <div class="event-title">ICONISIAM (Tharlavivill)</div>
+                        <div class="event-time">
+                            <span class="icon">⏰</span>
+                            15:00
+                        </div>
+                        <div class="event-duration">
+                            <span class="icon">⏱</span>
+                            3 h
+                        </div>
+                    </div>
+                    
+                    <button class="add-card-btn">
+                        <span class="icon">+</span>
+                        NEW CARD
+                    </button>
+                </div>
+            </div>
+
+            <!-- Monday May 5 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">MON, MAY 5</div>
+                </div>
+                <div class="day-content">
+                    <button class="add-card-btn">
+                        <span class="icon">+</span>
+                        NEW CARD
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tuesday May 6 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">TUE, MAY 6</div>
+                </div>
+                <div class="day-content">
+                    <button class="add-card-btn">
+                        <span class="icon">+</span>
+                        NEW CARD
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wednesday May 7 -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">WED, MAY 7</div>
+                </div>
+                <div class="day-content">
+                    <button class="add-card-btn">
+                        <span class="icon">+</span>
+                        NEW CARD
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

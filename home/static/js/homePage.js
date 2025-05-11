@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const startDateInput = document.getElementById('startDate');
     const returnDateInput = document.getElementById('returnDate');
     const tripDurationValue = document.getElementById('tripDurationValue');
-    const getStartedBtn = document.getElementById('getStartedBtn');
-    const tripForm = document.getElementById('tripForm');
 
     // Set min date for both inputs to today
     const today = new Date();
@@ -46,18 +44,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     returnDateInput.addEventListener('change', calculateDuration);
 
-    // Add event listener to the button
-    getStartedBtn.addEventListener('click', function () {
-        if (tripForm.checkValidity() && calculateDuration()) {
-            alert("Trip details submitted!\n" +
-                "Title: " + document.getElementById('tripTitle').value + "\n" +
-                "Start Date: " + startDateInput.value + "\n" +
-                "Return Date: " + returnDateInput.value + "\n" +
-                "Duration: " + tripDurationValue.textContent);
-            // Here you can add code to submit the form data
-        } else {
-            // Trigger browser's default validation
-            tripForm.reportValidity();
-        }
-    });
+    // // Add event listener to the button
+    // getStartedBtn.addEventListener('click', function () {
+    //     if (tripForm.checkValidity() && calculateDuration()) {
+    //         alert("Trip details submitted!\n" +
+    //             "Title: " + document.getElementById('tripTitle').value + "\n" +
+    //             "Start Date: " + startDateInput.value + "\n" +
+    //             "Return Date: " + returnDateInput.value + "\n" +
+    //             "Duration: " + tripDurationValue.textContent);
+    //         // Here you can add code to submit the form data
+    //     } else {
+    //         // Trigger browser's default validation
+    //         tripForm.reportValidity();
+    //     }
+    // });
 });

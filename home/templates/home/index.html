@@ -16,6 +16,9 @@
   </div>
 </nav>
 
+
+<!-- trip form section -->
+
 <section class="trip-form-section">
   <div class="trip-form-section-content">
     <div class="trip-form">
@@ -23,7 +26,7 @@
       <div class="trip-title-section">
         <div class="label">Title</div>
         <div class="input-field">
-          <input type="text" id="tripTitle" placeholder="e.g. BKK for Songkran" required>
+          <input type="text" id="tripTitle" placeholder="e.g. BKK for Songkran">
         </div>
       </div>
 
@@ -54,6 +57,10 @@
   </div>
 </section>
 
+
+
+
+
 <!-- homepage design -->
 <script src="/static/js/homePage.js"></script>
 
@@ -66,7 +73,11 @@
     let returnDate = document.getElementById("returnDate").value;
     let tripDurationText = document.getElementById("tripDurationValue").textContent;
 
-    if (!tripTitle || !startDate || !returnDate || tripDurationText.includes("Please") || tripDurationText.includes("Return date must")) {
+    if (!tripTitle){
+      tripTitle = "bangkok!";
+    }
+
+    if (!startDate || !returnDate || tripDurationText.includes("Please") || tripDurationText.includes("Return date must")) {
         alert("Please fill in all fields correctly.");
         return;
     }
@@ -89,7 +100,7 @@
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = `/itinerary/recommended_places/${data.trip_id}/`;
+            window.location.href = `/itinerary/edit_itinerary/${data.itinerary_id}/`;
         } else {
             alert(data.message);
         }
@@ -111,8 +122,6 @@ function getCSRFToken() {
     }
     return cookieValue;
 }
-
-
 </script>
 
 {% endblock %}

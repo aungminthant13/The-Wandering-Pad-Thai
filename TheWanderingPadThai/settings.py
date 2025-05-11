@@ -135,5 +135,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "user_auth.CustomUser"
 
-HERE_API_KEY = "P_vyG58Amepc16HY3v7MIbOjduaQUhz2pZqWTywM86M"
+# MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoiYXVuZ210IiwiYSI6ImNtOXFscWJ0cDFxNDIyanB6ajRwMDhyaXMifQ.RgGBYaWnqus5eH4qZlgR1w"
 
+LOGIN_URL = '/auth/login'

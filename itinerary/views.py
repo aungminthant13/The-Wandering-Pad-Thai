@@ -28,63 +28,74 @@ def create_itinerary(request):
                 duration=trip_duration  # Save as integer
             )
 
-            return JsonResponse({"success": True, "trip_id": itinerary.id})
+            return JsonResponse({"success": True, "itinerary_id": itinerary.id})
 
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
+            return JsonResponse({"success": False, "message": "Invalid. Try Again!"}, status=400)
 
     return JsonResponse({"success": False, "message": "Invalid request method"}, status=405)
 
 
 @login_required
-def recommended_places(request, trip_id):
-    itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+def recommended_places(request, itinerary_id):
+    itinerary = Itineraries.objects.get(id=itinerary_id, user=request.user)
     return render(request, 'itinerary/recommended_places.html', {"itinerary": itinerary})
 
+# MAPBOX_ACCESS_TOKEN = settings.MAPBOX_ACCESS_TOKEN
 
-HERE_API_KEY = settings.HERE_API_KEY
+# @login_required
+# def fetch_recommended_places(request, trip_id):
+#     try:
+#         itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+#     except Itineraries.DoesNotExist:
+#         return JsonResponse({"error": "Itinerary not found"}, status=404) 
+    
+#     latitude = 13.7563
+#     longitude = 100.5018
+    
 
-@login_required
-def fetch_recommended_places(request, trip_id):
-    try:
-        itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
-    except Itineraries.DoesNotExist:
-        return JsonResponse({"error": "Itinerary not found"}, status=404)
+# HERE_API_KEY = settings.HERE_API_KEY
 
-    latitude = 13.7563  # Bangkok
-    longitude = 100.5018  # Bangkok
-    radius = 2000  # Search radius in meters
-    api_key = HERE_API_KEY
+# @login_required
+# def fetch_recommended_places(request, trip_id):
+#     try:
+#         itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+#     except Itineraries.DoesNotExist:
+#         return JsonResponse({"error": "Itinerary not found"}, status=404)
 
-    url = f"https://discover.search.hereapi.com/v1/discover"
-    params = {
-        "apiKey": api_key,
-        "at": f"{latitude},{longitude}",
-        "q": "restaurants",
-        "limit": 20,
-        "lang": "en",
-        "categories": "100-1000-0001"
-    }
+#     latitude = 13.7563  # Bangkok
+#     longitude = 100.5018  # Bangkok
+#     radius = 20  # Search radius in meters
+#     api_key = HERE_API_KEY
 
-    response = requests.get(url, params=params)
-    data = response.json()
+#     url = f"https://discover.search.hereapi.com/v1/discover"
+#     params = {
+#         "apiKey": api_key,
+#         "at": f"{latitude},{longitude}",
+#         "q": "restaurants",
+#         "limit": 20,
+#         "lang": "en",
+#         "categories": "100-1000-0001"
+#     }
 
-    # Debugging response
-    print("HERE API RESPONSE:", data)
+#     response = requests.get(url, params=params)
+#     data = response.json()
 
-    attractions = [
-        {
-            "name": place["title"],
-            "lat": place["position"]["lat"],
-            "lng": place["position"]["lng"]
-        }
-        for place in data.get("items", [])
-    ]
+#     # Debugging response
+#     print("HERE API RESPONSE:", data)
 
-    return JsonResponse({"tourist_attractions": attractions})
+#     attractions = [
+#         {
+#             "name": place["title"],
+#             "lat": place["position"]["lat"],
+#             "lng": place["position"]["lng"]
+#         }
+#         for place in data.get("items", [])
+#     ]
+
+#     return JsonResponse({"tourist_attractions": attractions})
 
 
-def edit_itinerary(request, trip_id):
-    itinerary = Itineraries.objects.get(id=trip_id, user=request.user)
+def edit_itinerary(request, itinerary_id):
+    itinerary = Itineraries.objects.get(id=itinerary_id, user=request.user)
     return render(request, 'itinerary/edit_itinerary.html', {"itinerary": itinerary})
-
