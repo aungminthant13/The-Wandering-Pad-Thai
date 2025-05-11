@@ -5,6 +5,7 @@ import json
 from django.http import JsonResponse
 import requests
 from django.conf import settings
+from datetime import timedelta
 
 
 @login_required
@@ -25,7 +26,7 @@ def create_itinerary(request):
                 title=trip_title,
                 start_date=start_date,
                 return_date=return_date,
-                duration=trip_duration  # Save as integer
+                duration=trip_duration
             )
 
             return JsonResponse({"success": True, "itinerary_id": itinerary.id})
@@ -98,4 +99,11 @@ def recommended_places(request, itinerary_id):
 
 def edit_itinerary(request, itinerary_id):
     itinerary = Itineraries.objects.get(id=itinerary_id, user=request.user)
-    return render(request, 'itinerary/edit_itinerary.html', {"itinerary": itinerary})
+    start = itinerary.start_date
+    duration = itinerary.duration
+    date_list = [start + timedelta(days=i) for i in range(duration)]
+    
+    return render(request, 'itinerary/edit_itinerary.html', {
+        "itinerary": itinerary,
+        "date_list": date_list,
+        })

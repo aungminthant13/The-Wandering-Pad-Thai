@@ -1,0 +1,172 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgb(251, 248, 238);
+}
+  
+/* Navbar container */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    /* background-color: rgb(255, 255, 255); */
+    border-bottom: 1px solid #f0f0f0;
+}
+  
+/* Logo section */
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+  
+  
+.logo-text {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* remove colored link */
+a:link,
+a:visited,
+a:hover,
+a:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+  
+/* Your trips button
+  .user-acc-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px solid #006b71; /* Teal border */
+    /* border-radius: 25px;
+    color: #006B71;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s;
+}
+  
+  .user-acc-button:hover {
+    background-color: #006B71;
+    color: white;
+  } */ 
+
+
+/* trip details */
+.trip_details {
+    padding: 15px 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: black;
+}
+
+.trip_title {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.trip_dates {
+    padding-top: 10px;
+    font-size: 18px;
+}
+
+
+
+/* itinerary board */
+
+.itinerary_board {
+    display: flex;
+    gap: 0px;
+    overflow-x: auto;
+    padding: 10px;
+    margin: 10px 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    min-height: 500px;
+    max-width: 1600px;
+    /* scroll-snap-type: x mandatory; */
+}
+
+.itinerary_column {
+    background-color: #ffffff;
+    min-width: 200px;
+    max-width: 200px;
+    padding: 10px;
+    box-sizing: border-box;
+    border-right: 1px solid #d2d2d2;
+    scroll-snap-align: start; /* Optional: snap each column into view */
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+/* Sticky top section inside each column */
+.itinerary_column_dateNo,
+.itinerary_column_date {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 10;
+    padding: 5px;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 1px solid #aaa;
+    margin-bottom: 10px;
+}
+
+.itinerary_column_dateNo {
+    background-color: rgb(247, 232, 178);
+    color: rgb(0, 0, 0);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border-width: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    margin: 0 auto 5px auto;
+}
+
+
+
+/* Remove last column divider */
+.itinerary_column:last-child {
+    border-right: none;
+}
+
+.itinerary_column > hr {
+    margin: 8px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+    opacity: 1;
+}
+
+
+.itinerary_column_add_placeCard {
+    /* border: 2px dashed rgb(177, 136, 136); */
+
+    border: 2px solid transparent;
+    border-image: repeating-linear-gradient(
+      to right,
+      #888 0px,
+      #888 5px,
+      transparent 5px,
+      transparent 10px
+    );
+    border-image-slice: 1;
+
+}
+

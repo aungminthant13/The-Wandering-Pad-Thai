@@ -3,6 +3,55 @@
 
 {% block content %}
 
+{% block css %} <link rel="stylesheet" href="/static/itinerary/css/edit_itinerary_styles.css" /> {% endblock %}
+
+<!-- navbar -->
+<nav class="navbar">
+    <div class="logo">
+      <a href="{% url 'home' %}"
+        ><span class="logo-text">The Wandering Pad Thai</span></a
+      >
+    </div>
+  
+    <!-- <div class="user-acc">
+      <a href="#" class="user-acc-button">{{ user.name }}</a>
+    </div> -->
+</nav>
+
+<!-- {{ itinerary.title }}
+{{ itinerary.duration }} days
+{{ itinerary.start_date }}
+{{ itinerary.return_date }} -->
+
+<section>
+    <!-- trip details -->
+     <div class="trip_details">
+        <div class="trip_title">
+            {{ itinerary.title }}
+         </div>
+         <div class="trip_dates">
+            <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
+         </div>
+
+         <!-- • • º°·‣↠⇒⇢• ➡️ • • •  -->
+     </div>
+</section>
+
+<!-- itinerary board -->
+<section>
+    
+    <div class="itinerary_board">
+        {% for date in date_list %}
+            <div class="itinerary_column">
+                <div class="itinerary_column_dateNo">{{ forloop.counter }}</div>
+                <div class="itinerary_column_date">{{ date|date:"D, F j, Y" }}</div>
+
+                <div class="itinerary_column_add_placeCard">Add A Place</div>
+            </div>
+        {% endfor %}
+    </div>
+        
+</section>
 
 
 {% endblock %}
