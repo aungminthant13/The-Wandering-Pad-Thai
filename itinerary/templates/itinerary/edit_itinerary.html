@@ -12,16 +12,7 @@
         ><span class="logo-text">The Wandering Pad Thai</span></a
       >
     </div>
-  
-    <!-- <div class="user-acc">
-      <a href="#" class="user-acc-button">{{ user.name }}</a>
-    </div> -->
 </nav>
-
-<!-- {{ itinerary.title }}
-{{ itinerary.duration }} days
-{{ itinerary.start_date }}
-{{ itinerary.return_date }} -->
 
 <section>
     <!-- trip details -->
@@ -32,26 +23,258 @@
          <div class="trip_dates">
             <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
          </div>
-
-         <!-- • • º°·‣↠⇒⇢• ➡️ • • •  -->
      </div>
 </section>
 
 <!-- itinerary board -->
 <section>
-    
     <div class="itinerary_board">
         {% for date in date_list %}
-            <div class="itinerary_column">
-                <div class="itinerary_column_dateNo">{{ forloop.counter }}</div>
-                <div class="itinerary_column_date">{{ date|date:"D, F j, Y" }}</div>
-
-                <div class="itinerary_column_add_placeCard">Add A Place</div>
-            </div>
+        <div class="itinerary_column" data-date="{{ date }}">
+            <div class="itinerary_column_dateNo">{{ forloop.counter }}</div>
+            <div class="itinerary_column_date">{{ date|date:"D, F j, Y" }}</div>
+    
+            <button class="itinerary_column_add_placeCard">Add A Place</button>
+    
+            <!-- This is where new cards will be injected -->
+            <div class="place_cards_container"></div>
+        </div>
         {% endfor %}
     </div>
-        
+
+    <!-- MOVED MODAL OUTSIDE THE BOARD -->
+    <div id="placeCardFormModal" class="placeCardFormModal hidden">
+        <form id="placeCardForm">
+            <h3 style="margin-bottom: 20px; text-align: center;">Add New Place</h3>
+            
+            <input type="text" name="place_name" placeholder="Place Name" required>
+            <input type="time" name="time">
+            <textarea name="notes" placeholder="Notes" rows="3"></textarea>
+    
+            <input type="hidden" name="date" id="placeFormDate">
+    
+            <div style="text-align: center;">
+                <button type="button" id="cancelFormBtn">Cancel</button>
+                <button type="button" id="deleteFormBtn" style="background-color: #dc3545; color: white; display: none;">Delete</button>
+                <button type="submit">Save Place</button>
+            </div>
+        </form>
+    </div>
 </section>
 
+<script>
+    // CLEANED UP JAVASCRIPT - NO DUPLICATES
+    const modal = document.getElementById('placeCardFormModal');
+    const form = document.getElementById('placeCardForm');
+    const cancelBtn = document.getElementById('cancelFormBtn');
+    const deleteBtn = document.getElementById('deleteFormBtn');
+    const placeFormDate = document.getElementById('placeFormDate');
+    let editingCard = null; // Track if we're editing an existing card
+
+    // Show modal when "Add A Place" buttons are clicked
+    document.querySelectorAll('.itinerary_column_add_placeCard').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const column = btn.closest('.itinerary_column');
+            const date = column.dataset.date;
+
+            // Reset editing state
+            editingCard = null;
+            form.reset();
+
+            // Set the hidden input value
+            placeFormDate.value = date;
+
+            // Update modal title and buttons for ADD mode
+            document.querySelector('#placeCardForm h3').textContent = 'Add New Place';
+            document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Save Place';
+            deleteBtn.style.display = 'none'; // Hide delete button for new places
+
+            // Show the modal
+            modal.classList.remove('hidden');
+        });
+    });
+
+    // Handle form submission (both create and edit)
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const placeName = this.place_name.value;
+        const time = this.time.value;
+        const notes = this.notes.value;
+        const date = this.date.value;
+
+        if (editingCard) {
+            // UPDATE EXISTING CARD
+            editingCard.innerHTML = `
+                <div class="drag-handle">⋮⋮</div>
+                <strong>${placeName}</strong><br>
+                <span>${time || 'No time set'}</span>
+                <p>${notes || 'No notes'}</p>
+            `;
+
+            // If date changed, move card to new column
+            const currentColumn = editingCard.closest('.itinerary_column');
+            const currentDate = currentColumn.dataset.date;
+            
+            if (currentDate !== date) {
+                const newColumn = document.querySelector(`.itinerary_column[data-date="${date}"]`);
+                const newContainer = newColumn.querySelector('.place_cards_container');
+                newContainer.appendChild(editingCard);
+            }
+
+            // Reset editing state
+            editingCard = null;
+        } else {
+            // CREATE NEW CARD
+            const column = document.querySelector(`.itinerary_column[data-date="${date}"]`);
+            const container = column.querySelector('.place_cards_container');
+
+            const card = document.createElement('div');
+            card.classList.add('place_card');
+            card.draggable = true;
+            card.innerHTML = `
+                <div class="drag-handle">⋮⋮</div>
+                <strong>${placeName}</strong><br>
+                <span>${time || 'No time set'}</span>
+                <p>${notes || 'No notes'}</p>
+            `;
+
+            // Add drag and edit listeners to the new card
+            addDragListeners(card);
+            addEditListener(card);
+
+            container.appendChild(card);
+        }
+
+        // Reset and hide form
+        this.reset();
+        modal.classList.add('hidden');
+    });
+
+    // Cancel button
+    cancelBtn.addEventListener('click', function() {
+        form.reset();
+        editingCard = null; // Reset editing state
+        modal.classList.add('hidden');
+    });
+
+    // Delete button
+    deleteBtn.addEventListener('click', function() {
+        if (editingCard && confirm('Are you sure you want to delete this place?')) {
+            editingCard.remove(); // Remove the card from DOM
+            form.reset();
+            editingCard = null;
+            modal.classList.add('hidden');
+        }
+    });
+
+    // Close when clicking outside the form
+    modal.addEventListener('click', function(event) {
+        if (!form.contains(event.target)) {
+            form.reset();
+            editingCard = null; // Reset editing state
+            modal.classList.add('hidden');
+        }
+    });
+
+    // DRAG AND DROP FUNCTIONALITY
+    let draggedElement = null;
+
+    // Function to add drag listeners to place cards
+    function addDragListeners(card) {
+        card.addEventListener('dragstart', function(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        card.addEventListener('dragend', function(e) {
+            this.classList.remove('dragging');
+            draggedElement = null;
+        });
+    }
+
+    // Function to add edit listener to place cards
+    function addEditListener(card) {
+        card.addEventListener('click', function(e) {
+            // Prevent editing when dragging
+            if (this.classList.contains('dragging')) return;
+            
+            // Don't trigger on drag handle clicks
+            if (e.target.classList.contains('drag-handle')) return;
+
+            // Set editing state
+            editingCard = this;
+
+            // Get current card data
+            const strong = this.querySelector('strong').textContent;
+            const span = this.querySelector('span').textContent;
+            const p = this.querySelector('p').textContent;
+            const currentColumn = this.closest('.itinerary_column');
+            const currentDate = currentColumn.dataset.date;
+
+            // Pre-fill form
+            form.place_name.value = strong;
+            form.time.value = span === 'No time set' ? '' : span;
+            form.notes.value = p === 'No notes' ? '' : p;
+            placeFormDate.value = currentDate;
+
+            // Update modal title and buttons for EDIT mode
+            document.querySelector('#placeCardForm h3').textContent = 'Edit Place';
+            document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Update Place';
+            deleteBtn.style.display = 'inline-block'; // Show delete button for existing places
+
+            // Show the modal
+            modal.classList.remove('hidden');
+        });
+    }
+
+    // Add drag and edit listeners to all existing place cards (if any)
+    document.querySelectorAll('.place_card').forEach(card => {
+        addDragListeners(card);
+        addEditListener(card);
+    });
+
+    // Make place card containers drop zones
+    document.querySelectorAll('.place_cards_container').forEach(container => {
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const afterElement = getDragAfterElement(container, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            
+            if (afterElement == null) {
+                container.appendChild(dragging);
+            } else {
+                container.insertBefore(dragging, afterElement);
+            }
+        });
+
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            // The card is already moved in dragover, just clean up
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
+        });
+    });
+
+    // Function to determine where to insert the dragged element
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.place_card:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+</script>
 
 {% endblock %}
