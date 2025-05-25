@@ -54,7 +54,16 @@
             </div>
             
             <input type="text" name="place_name" placeholder="Place Name" required>
-            <input type="time" name="time">
+            <div class="time-inputs">
+                <div class="time-input-group">
+                    <label for="start_time">Start at</label>
+                    <input type="time" name="time" id="start_time">
+                </div>
+                <div class="time-input-group">
+                    <label for="end_time">Until</label>
+                    <input type="time" name="end_time" id="end_time">
+                </div>
+            </div>
             <textarea name="notes" placeholder="Notes" rows="3"></textarea>
     
             <input type="hidden" name="date" id="placeFormDate">
@@ -181,14 +190,14 @@
         window.placesService.getDetails(request, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
                 // Fill in the form fields
-                placeNameInput.value = place.name;
+                placeNameInput.value = place.name; // This can be edited by user
                 placeIdInput.value = place.place_id;
                 placeLatInput.value = place.geometry.location.lat();
                 placeLngInput.value = place.geometry.location.lng();
                 placeAddressInput.value = place.formatted_address;
 
-                // Clear search input and hide results
-                placeSearchInput.value = '';
+                // Keep the place name in search input
+                placeSearchInput.value = place.name;
                 placeSearchResults.classList.add('hidden');
                 
                 // Show feedback banner
@@ -260,6 +269,7 @@
 
         const placeName = this.place_name.value;
         const time = this.time.value;
+        const endTime = this.end_time.value;
         const notes = this.notes.value;
         const date = this.date.value;
         const placeId = this.place_id.value;
@@ -267,20 +277,42 @@
         const placeLng = this.place_lng.value;
         const placeAddress = this.place_address.value;
 
+        // Format time display
+        let timeDisplay = '';
+        if (time && endTime) {
+            timeDisplay = `${time} - ${endTime}`;
+        } else if (time) {
+            timeDisplay = `${time}`;
+        } else if (endTime) {
+            timeDisplay = `Until ${endTime}`;
+        }
+
         if (editingCard) {
             // UPDATE EXISTING CARD
-            editingCard.innerHTML = `
+            let cardHTML = `
                 <div class="drag-handle">⋮⋮</div>
-                <strong>${placeName}</strong><br>
-                <span>${time || 'No time set'}</span>
-                <p>${notes || 'No notes'}</p>
-            `;
+                <strong>${placeName}</strong><br>`;
+            
+            // Only add time if it exists
+            if (timeDisplay) {
+                cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
+            }
+            
+            // Only add notes if they exist
+            if (notes) {
+                cardHTML += `<p>${notes}</p>`;
+            }
+            
+            editingCard.innerHTML = cardHTML;
 
             // Update data attributes
             editingCard.dataset.placeId = placeId;
             editingCard.dataset.placeLat = placeLat;
             editingCard.dataset.placeLng = placeLng;
             editingCard.dataset.placeAddress = placeAddress;
+            editingCard.dataset.originalPlaceName = placeSearchInput.value || placeName;
+            editingCard.dataset.startTime = time;
+            editingCard.dataset.endTime = endTime;
 
             // If date changed, move card to new column
             const currentColumn = editingCard.closest('.itinerary_column');
@@ -308,13 +340,25 @@
             card.dataset.placeLat = placeLat;
             card.dataset.placeLng = placeLng;
             card.dataset.placeAddress = placeAddress;
+            card.dataset.originalPlaceName = placeSearchInput.value || placeName;
+            card.dataset.startTime = time;
+            card.dataset.endTime = endTime;
             
-            card.innerHTML = `
+            let cardHTML = `
                 <div class="drag-handle">⋮⋮</div>
-                <strong>${placeName}</strong><br>
-                <span>${time || 'No time set'}</span>
-                <p>${notes || 'No notes'}</p>
-            `;
+                <strong>${placeName}</strong><br>`;
+            
+            // Only add time if it exists
+            if (timeDisplay) {
+                cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
+            }
+            
+            // Only add notes if they exist
+            if (notes) {
+                cardHTML += `<p>${notes}</p>`;
+            }
+            
+            card.innerHTML = cardHTML;
 
             // Add drag and edit listeners to the new card
             addDragListeners(card);
@@ -391,14 +435,27 @@
 
             // Get current card data
             const strong = this.querySelector('strong').textContent;
-            const span = this.querySelector('span').textContent;
+            const timeSpan = this.querySelector('.time-span').textContent;
             const p = this.querySelector('p').textContent;
             const currentColumn = this.closest('.itinerary_column');
             const currentDate = currentColumn.dataset.date;
 
             // Pre-fill form
             form.place_name.value = strong;
-            form.time.value = span === 'No time set' ? '' : span;
+            
+            // Extract start and end times from the time span
+            if (this.dataset.startTime) {
+                form.time.value = this.dataset.startTime;
+            } else {
+                form.time.value = '';
+            }
+            
+            if (this.dataset.endTime) {
+                form.end_time.value = this.dataset.endTime;
+            } else {
+                form.end_time.value = '';
+            }
+            
             form.notes.value = p === 'No notes' ? '' : p;
             placeFormDate.value = currentDate;
 
@@ -407,6 +464,16 @@
             placeLatInput.value = this.dataset.placeLat || '';
             placeLngInput.value = this.dataset.placeLng || '';
             placeAddressInput.value = this.dataset.placeAddress || '';
+            
+            // If this place has Google data, show the original place name in search field
+            if (this.dataset.placeId && this.dataset.originalPlaceName) {
+                placeSearchInput.value = this.dataset.originalPlaceName;
+            } else if (this.dataset.placeId) {
+                // Fallback to current title if original name not stored
+                placeSearchInput.value = strong;
+            } else {
+                placeSearchInput.value = '';
+            }
 
             // Update modal title and buttons for EDIT mode
             document.querySelector('#placeCardForm h3').textContent = 'Edit Place';

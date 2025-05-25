@@ -410,3 +410,39 @@ a:active {
         opacity: 1;
     }
 }
+
+/* Time inputs layout */
+.time-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.time-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.time-input-group label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.time-input-group input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+/* Style the time display in place cards */
+.place_card .time-span {
+    color: #006b71;
+    font-weight: 500;
+}
