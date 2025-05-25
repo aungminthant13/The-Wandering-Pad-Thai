@@ -309,3 +309,104 @@ a:active {
 .place_cards_container:hover {
     background-color: rgba(0, 107, 113, 0.05);
 }
+
+/* NEW: Place search styles */
+.place-search-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+#placeSearchInput {
+    width: 100%;
+    padding: 10px;
+    padding-left: 35px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>');
+    background-repeat: no-repeat;
+    background-position: 10px center;
+}
+
+#placeSearchInput:focus {
+    outline: none;
+    border-color: #006b71;
+}
+
+.place-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10002;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.place-search-result-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.place-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.place-search-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+.place-search-result-item .place-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.place-search-result-item .place-address {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Loading indicator for search */
+.place-search-results.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.place-search-results.loading::after {
+    content: "Searching...";
+}
+
+/* Feedback banner */
+.feedback-banner {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: center;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

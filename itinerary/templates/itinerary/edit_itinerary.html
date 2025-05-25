@@ -47,11 +47,22 @@
         <form id="placeCardForm">
             <h3 style="margin-bottom: 20px; text-align: center;">Add New Place</h3>
             
+            <!-- NEW: Place search input with autocomplete -->
+            <div class="place-search-container">
+                <input type="text" id="placeSearchInput" placeholder="Search for a place..." autocomplete="off">
+                <div id="placeSearchResults" class="place-search-results hidden"></div>
+            </div>
+            
             <input type="text" name="place_name" placeholder="Place Name" required>
             <input type="time" name="time">
             <textarea name="notes" placeholder="Notes" rows="3"></textarea>
     
             <input type="hidden" name="date" id="placeFormDate">
+            <!-- NEW: Hidden fields to store place data -->
+            <input type="hidden" name="place_id" id="placeId">
+            <input type="hidden" name="place_lat" id="placeLat">
+            <input type="hidden" name="place_lng" id="placeLng">
+            <input type="hidden" name="place_address" id="placeAddress">
     
             <div style="text-align: center;">
                 <button type="button" id="cancelFormBtn">Cancel</button>
@@ -62,6 +73,27 @@
     </div>
 </section>
 
+<!-- Load Google Maps JavaScript API -->
+<script>
+    // Load Google Maps API with Places library
+    function loadGoogleMapsAPI() {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDAUVXGHCpvYCMOEYYAwJrxT-YDIBmzffg&libraries=places&callback=initializePlaces`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+
+    // Initialize Places service after API loads
+    function initializePlaces() {
+        window.placesService = new google.maps.places.PlacesService(document.createElement('div'));
+        window.autocompleteService = new google.maps.places.AutocompleteService();
+    }
+
+    // Load the API when page loads
+    loadGoogleMapsAPI();
+</script>
+
 <script>
     // CLEANED UP JAVASCRIPT - NO DUPLICATES
     const modal = document.getElementById('placeCardFormModal');
@@ -70,6 +102,132 @@
     const deleteBtn = document.getElementById('deleteFormBtn');
     const placeFormDate = document.getElementById('placeFormDate');
     let editingCard = null; // Track if we're editing an existing card
+
+    // NEW: Place search elements
+    const placeSearchInput = document.getElementById('placeSearchInput');
+    const placeSearchResults = document.getElementById('placeSearchResults');
+    const placeNameInput = form.place_name;
+    const placeIdInput = document.getElementById('placeId');
+    const placeLatInput = document.getElementById('placeLat');
+    const placeLngInput = document.getElementById('placeLng');
+    const placeAddressInput = document.getElementById('placeAddress');
+
+    // NEW: Place search functionality
+    let searchTimeout;
+    placeSearchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            placeSearchResults.classList.add('hidden');
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            searchPlaces(query);
+        }, 300); // Debounce for 300ms
+    });
+
+    function searchPlaces(query) {
+        if (!window.autocompleteService) {
+            console.error('Google Places API not loaded yet');
+            return;
+        }
+
+        const request = {
+            input: query,
+            // Limit search to Bangkok area
+            location: new google.maps.LatLng(13.7563, 100.5018), // Bangkok center
+            radius: 30000, // 30km radius to cover Greater Bangkok
+            componentRestrictions: { country: 'th' } // Restrict to Thailand
+        };
+
+        window.autocompleteService.getPlacePredictions(request, (predictions, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+                displaySearchResults(predictions);
+            } else {
+                placeSearchResults.classList.add('hidden');
+            }
+        });
+    }
+
+    function displaySearchResults(predictions) {
+        placeSearchResults.innerHTML = '';
+        placeSearchResults.classList.remove('hidden');
+
+        predictions.forEach(prediction => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'place-search-result-item';
+            resultItem.innerHTML = `
+                <div class="place-name">${prediction.structured_formatting.main_text}</div>
+                <div class="place-address">${prediction.structured_formatting.secondary_text || ''}</div>
+            `;
+
+            resultItem.addEventListener('click', () => {
+                selectPlace(prediction);
+            });
+
+            placeSearchResults.appendChild(resultItem);
+        });
+    }
+
+    function selectPlace(prediction) {
+        // Get place details
+        const request = {
+            placeId: prediction.place_id,
+            fields: ['name', 'formatted_address', 'geometry', 'place_id']
+        };
+
+        window.placesService.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                // Fill in the form fields
+                placeNameInput.value = place.name;
+                placeIdInput.value = place.place_id;
+                placeLatInput.value = place.geometry.location.lat();
+                placeLngInput.value = place.geometry.location.lng();
+                placeAddressInput.value = place.formatted_address;
+
+                // Clear search input and hide results
+                placeSearchInput.value = '';
+                placeSearchResults.classList.add('hidden');
+                
+                // Show feedback banner
+                showFeedbackBanner('✓ Place selected: ' + place.name);
+            }
+        });
+    }
+
+    // Function to show temporary feedback banner
+    function showFeedbackBanner(message) {
+        // Remove any existing banner
+        const existingBanner = document.querySelector('.feedback-banner');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
+
+        // Create new banner
+        const banner = document.createElement('div');
+        banner.className = 'feedback-banner';
+        banner.textContent = message;
+        
+        // Add to modal
+        form.insertBefore(banner, form.firstChild);
+
+        // Remove after 3 seconds with fade out
+        setTimeout(() => {
+            banner.style.opacity = '0';
+            setTimeout(() => {
+                banner.remove();
+            }, 300);
+        }, 2700);
+    }
+
+    // Hide search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!placeSearchInput.contains(e.target) && !placeSearchResults.contains(e.target)) {
+            placeSearchResults.classList.add('hidden');
+        }
+    });
 
     // Show modal when "Add A Place" buttons are clicked
     document.querySelectorAll('.itinerary_column_add_placeCard').forEach(btn => {
@@ -80,6 +238,8 @@
             // Reset editing state
             editingCard = null;
             form.reset();
+            placeSearchInput.value = ''; // Clear search input
+            placeSearchResults.classList.add('hidden'); // Hide search results
 
             // Set the hidden input value
             placeFormDate.value = date;
@@ -102,6 +262,10 @@
         const time = this.time.value;
         const notes = this.notes.value;
         const date = this.date.value;
+        const placeId = this.place_id.value;
+        const placeLat = this.place_lat.value;
+        const placeLng = this.place_lng.value;
+        const placeAddress = this.place_address.value;
 
         if (editingCard) {
             // UPDATE EXISTING CARD
@@ -111,6 +275,12 @@
                 <span>${time || 'No time set'}</span>
                 <p>${notes || 'No notes'}</p>
             `;
+
+            // Update data attributes
+            editingCard.dataset.placeId = placeId;
+            editingCard.dataset.placeLat = placeLat;
+            editingCard.dataset.placeLng = placeLng;
+            editingCard.dataset.placeAddress = placeAddress;
 
             // If date changed, move card to new column
             const currentColumn = editingCard.closest('.itinerary_column');
@@ -132,6 +302,13 @@
             const card = document.createElement('div');
             card.classList.add('place_card');
             card.draggable = true;
+            
+            // Store place data as data attributes
+            card.dataset.placeId = placeId;
+            card.dataset.placeLat = placeLat;
+            card.dataset.placeLng = placeLng;
+            card.dataset.placeAddress = placeAddress;
+            
             card.innerHTML = `
                 <div class="drag-handle">⋮⋮</div>
                 <strong>${placeName}</strong><br>
@@ -148,12 +325,15 @@
 
         // Reset and hide form
         this.reset();
+        placeSearchInput.value = ''; // Clear search input
         modal.classList.add('hidden');
     });
 
     // Cancel button
     cancelBtn.addEventListener('click', function() {
         form.reset();
+        placeSearchInput.value = ''; // Clear search input
+        placeSearchResults.classList.add('hidden'); // Hide search results
         editingCard = null; // Reset editing state
         modal.classList.add('hidden');
     });
@@ -163,6 +343,7 @@
         if (editingCard && confirm('Are you sure you want to delete this place?')) {
             editingCard.remove(); // Remove the card from DOM
             form.reset();
+            placeSearchInput.value = ''; // Clear search input
             editingCard = null;
             modal.classList.add('hidden');
         }
@@ -172,6 +353,8 @@
     modal.addEventListener('click', function(event) {
         if (!form.contains(event.target)) {
             form.reset();
+            placeSearchInput.value = ''; // Clear search input
+            placeSearchResults.classList.add('hidden'); // Hide search results
             editingCard = null; // Reset editing state
             modal.classList.add('hidden');
         }
@@ -218,6 +401,12 @@
             form.time.value = span === 'No time set' ? '' : span;
             form.notes.value = p === 'No notes' ? '' : p;
             placeFormDate.value = currentDate;
+
+            // Pre-fill place data if available
+            placeIdInput.value = this.dataset.placeId || '';
+            placeLatInput.value = this.dataset.placeLat || '';
+            placeLngInput.value = this.dataset.placeLng || '';
+            placeAddressInput.value = this.dataset.placeAddress || '';
 
             // Update modal title and buttons for EDIT mode
             document.querySelector('#placeCardForm h3').textContent = 'Edit Place';
