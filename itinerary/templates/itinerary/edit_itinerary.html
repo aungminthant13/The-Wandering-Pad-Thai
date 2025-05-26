@@ -27,8 +27,20 @@
      </div>
 </section>
 
+<!-- View toggle switch -->
+<div class="view-toggle-container">
+    <div class="view-toggle">
+        <input type="checkbox" id="viewToggle" class="toggle-checkbox">
+        <label for="viewToggle" class="toggle-label">
+            <span class="toggle-text-left">Board</span>
+            <span class="toggle-text-right">Map</span>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
 <!-- itinerary board -->
-<section>
+<section id="boardView">
     <div class="itinerary_board">
         {% for date in date_list %}
         <div class="itinerary_column" data-date="{{ date|date:'Y-m-d' }}">
@@ -77,52 +89,62 @@
         </div>
         {% endfor %}
     </div>
+</section>
 
-    <!-- MODAL -->
-    <div id="placeCardFormModal" class="placeCardFormModal hidden">
-        <form id="placeCardForm">
-            <h3 style="margin-bottom: 20px; text-align: center;">Add New Place</h3>
-            
-            <!-- Place search input with autocomplete -->
-            <div class="place-search-container">
-                <input type="text" id="placeSearchInput" placeholder="Search for a place..." autocomplete="off">
-                <div id="placeSearchResults" class="place-search-results hidden"></div>
-            </div>
-            
-            <input type="text" name="title" placeholder="Place Name" required>
-            <div class="time-inputs">
-                <div class="time-input-group">
-                    <label for="start_time">Start at</label>
-                    <input type="time" name="time" id="start_time">
-                </div>
-                <div class="time-input-group">
-                    <label for="end_time">Until</label>
-                    <input type="time" name="end_time" id="end_time">
-                </div>
-            </div>
-            <textarea name="notes" placeholder="Notes" rows="3"></textarea>
-    
-            <input type="hidden" name="date" id="placeFormDate">
-            <!-- Hidden fields to store place data -->
-            <input type="hidden" name="place_id" id="placeId">
-            <input type="hidden" name="place_lat" id="placeLat">
-            <input type="hidden" name="place_lng" id="placeLng">
-            <input type="hidden" name="place_address" id="placeAddress">
-            <input type="hidden" name="card_id" id="cardId">
-    
-            <div style="text-align: center;">
-                <button type="button" id="cancelFormBtn">Cancel</button>
-                <button type="button" id="deleteFormBtn" style="background-color: #dc3545; color: white; display: none;">Delete</button>
-                <button type="submit">Save Place</button>
-            </div>
-        </form>
+<!-- Map view -->
+<section id="mapView" style="display: none;">
+    <div class="map-container">
+        <div id="itineraryMap" class="itinerary-map"></div>
     </div>
 </section>
+
+<!-- MODAL -->
+<div id="placeCardFormModal" class="placeCardFormModal hidden">
+    <form id="placeCardForm">
+        <h3 style="margin-bottom: 20px; text-align: center;">Add New Place</h3>
+        
+        <!-- Place search input with autocomplete -->
+        <div class="place-search-container">
+            <input type="text" id="placeSearchInput" placeholder="Search for a place..." autocomplete="off">
+            <div id="placeSearchResults" class="place-search-results hidden"></div>
+        </div>
+        
+        <input type="text" name="title" placeholder="Place Name" required>
+        <div class="time-inputs">
+            <div class="time-input-group">
+                <label for="start_time">Start at</label>
+                <input type="time" name="time" id="start_time">
+            </div>
+            <div class="time-input-group">
+                <label for="end_time">Until</label>
+                <input type="time" name="end_time" id="end_time">
+            </div>
+        </div>
+        <textarea name="notes" placeholder="Notes" rows="3"></textarea>
+
+        <input type="hidden" name="date" id="placeFormDate">
+        <!-- Hidden fields to store place data -->
+        <input type="hidden" name="place_id" id="placeId">
+        <input type="hidden" name="place_lat" id="placeLat">
+        <input type="hidden" name="place_lng" id="placeLng">
+        <input type="hidden" name="place_address" id="placeAddress">
+        <input type="hidden" name="card_id" id="cardId">
+
+        <div style="text-align: center;">
+            <button type="button" id="cancelFormBtn">Cancel</button>
+            <button type="button" id="deleteFormBtn" style="background-color: #dc3545; color: white; display: none;">Delete</button>
+            <button type="submit">Save Place</button>
+        </div>
+    </form>
+</div>
 
 <!-- Load Google Maps JavaScript API -->
 <script>
     // Global variables
     const ITINERARY_ID = {{ itinerary.id }};
+    let map = null;
+    let markers = [];
+    let infoWindows = [];
     
     // Load Google Maps API with Places library
     function loadGoogleMapsAPI() {
@@ -137,6 +159,170 @@
     function initializePlaces() {
         window.placesService = new google.maps.places.PlacesService(document.createElement('div'));
         window.autocompleteService = new google.maps.places.AutocompleteService();
+        
+        // Set a flag that API is loaded
+        window.googleMapsLoaded = true;
+        
+        // Initialize map if toggle is already checked
+        const viewToggle = document.getElementById('viewToggle');
+        if (viewToggle && viewToggle.checked) {
+            initializeMap();
+        }
+    }
+
+    // Initialize the map
+    function initializeMap() {
+        console.log('Initializing map...');
+        const mapElement = document.getElementById('itineraryMap');
+        if (!mapElement) {
+            console.error('Map element not found!');
+            return;
+        }
+
+        try {
+            map = new google.maps.Map(mapElement, {
+                center: { lat: 13.7563, lng: 100.5018 }, //BKK
+                zoom: 12,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+            
+            console.log('Map created successfully');
+
+            // Add places to map
+            updateMapMarkers();
+        } catch (error) {
+            console.error('Error creating map:', error);
+        }
+    }
+
+    // Update map markers based on current place cards
+    function updateMapMarkers() {
+        console.log('Updating map markers...');
+        if (!map) {
+            console.error('Map not initialized!');
+            return;
+        }
+
+        // Clear existing markers
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+        infoWindows.forEach(infoWindow => infoWindow.close());
+        infoWindows = [];
+
+        const bounds = new google.maps.LatLngBounds();
+        let hasValidMarkers = false;
+
+        // Collect all place cards with their date numbers
+        document.querySelectorAll('.itinerary_column').forEach((column, index) => {
+            const dateNumber = index + 1;
+            const cards = column.querySelectorAll('.place_card');
+
+            cards.forEach((card, cardIndex) => {
+                const placeName = document.getElementById('placeSearchInput').value;
+                const lat = parseFloat(card.dataset.placeLat);
+                const lng = parseFloat(card.dataset.placeLng);
+                const title = card.querySelector('strong').textContent;
+                const timeSpan = card.querySelector('.time-span');
+                const notes = card.querySelector('p');
+
+                // Skip if no valid coordinates
+                if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+
+                hasValidMarkers = true;
+                const position = { lat, lng };
+
+                // Create custom marker with date number
+                const marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: title,
+                    label: {
+                        text: `[${dateNumber}]`,
+                        color: 'black',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: getColorForDate(dateNumber),
+                        fillOpacity: 1,
+                        strokeColor: 'black',
+                        strokeWeight: 2,
+                        scale: 15
+                    }
+                });
+
+
+                // Create info window content
+                let infoContent = `
+                    <div class="map-info-window">
+
+                        <h4>Day ${dateNumber}: ${title}</h4>
+                `;
+
+                if (timeSpan) {
+                    infoContent += `<p class="time-info">${timeSpan.textContent}</p>`;
+                }
+
+                if (notes) {
+                    infoContent += `<p class="notes-info">${notes.textContent}</p>`;
+                }
+
+                if (card.dataset.placeAddress) {
+                    infoContent += `<p class="address-info">${card.dataset.placeAddress}</p>`;
+                }
+
+                infoContent += '</div>';
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoContent
+                });
+
+                marker.addListener('click', () => {
+                    // Close all other info windows
+                    infoWindows.forEach(iw => iw.close());
+                    infoWindow.open(map, marker);
+                });
+
+                markers.push(marker);
+                infoWindows.push(infoWindow);
+                bounds.extend(position);
+            });
+        });
+
+        // Fit map to show all markers
+        if (hasValidMarkers) {
+            map.fitBounds(bounds);
+            
+            // Don't zoom in too much for single markers
+            const listener = google.maps.event.addListener(map, "idle", function() {
+                if (map.getZoom() > 16) map.setZoom(16);
+                google.maps.event.removeListener(listener);
+            });
+        }
+    }
+
+    // Get color for date marker
+    function getColorForDate(dateNumber) {
+        const colors = [
+            '#4ECDC4',
+            '#FFEAA7',
+            '#FF6B6B',
+            '#BB8FCE',
+            '#45B7D1', 
+            '#98D8C8',
+            '#FFA07A',
+            '#DDA0DD',
+            '#96CEB4',
+            '#F7DC6F',
+        ];
+        return colors[(dateNumber - 1) % colors.length];
     }
 
     // Load the API when page loads
@@ -147,6 +333,44 @@
     // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, initializing modal functionality');
+        
+        // VIEW TOGGLE FUNCTIONALITY
+        const viewToggle = document.getElementById('viewToggle');
+        const boardView = document.getElementById('boardView');
+        const mapView = document.getElementById('mapView');
+
+        viewToggle.addEventListener('change', function() {
+            if (this.checked) {
+                // Show map view
+                boardView.style.display = 'none';
+                mapView.style.display = 'block';
+                
+                // Check if Google Maps is loaded
+                if (!window.googleMapsLoaded) {
+                    console.log('Waiting for Google Maps to load...');
+                    // Try again in a moment
+                    const checkInterval = setInterval(() => {
+                        if (window.googleMapsLoaded) {
+                            clearInterval(checkInterval);
+                            initializeMap();
+                        }
+                    }, 100);
+                } else if (!map) {
+                    // Initialize map if not already done
+                    initializeMap();
+                } else {
+                    // Update markers and trigger resize
+                    setTimeout(() => {
+                        google.maps.event.trigger(map, 'resize');
+                        updateMapMarkers();
+                    }, 100);
+                }
+            } else {
+                // Show board view
+                boardView.style.display = 'block';
+                mapView.style.display = 'none';
+            }
+        });
         
         // SAVE STATUS MANAGEMENT
         const saveStatus = document.getElementById('saveStatus');
@@ -196,6 +420,12 @@
                 
                 if (result.success) {
                     showSaveStatus('saved', 'Saved!');
+                    
+                    // Update map markers if in map view
+                    if (viewToggle.checked) {
+                        setTimeout(updateMapMarkers, 100);
+                    }
+                    
                     return result.card_id;
                 } else {
                     showSaveStatus('error', 'Save failed');
@@ -637,6 +867,11 @@
                 clearGooglePlacesData();
                 editingCard = null;
                 modal.classList.add('hidden');
+                
+                // Update map markers if in map view
+                if (viewToggle.checked) {
+                    setTimeout(updateMapMarkers, 100);
+                }
             }
         });
 
@@ -749,6 +984,12 @@
                 
                 if (result.success) {
                     showSaveStatus('saved', 'Order saved!');
+                    
+                    // Update map markers if in map view
+                    if (viewToggle.checked) {
+                        setTimeout(updateMapMarkers, 100);
+                    }
+                    
                     return true;
                 } else {
                     console.error('Order save error:', result.message);

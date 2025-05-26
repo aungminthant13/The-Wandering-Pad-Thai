@@ -11,6 +11,6 @@ def home(request):
     return render(request, 'home/index.html')
 
 
-# def trips(request):
-#     user_itineraries = Itineraries.objects.filter(user=request.user)
-#     return render(request, 'home/trips.html', {'itineraries': user_itineraries})
+def trips(request):
+    user_itineraries = Itineraries.objects.filter(user=request.user)
+    return render(request, 'home/trips.html', {'itineraries': user_itineraries})

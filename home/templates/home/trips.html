@@ -1,17 +1,23 @@
-{% extends "home/base.html" %} 
-
-{% block title %}Home{% endblock %} 
-
+{% extends "home/base.html" %} {% block title %}Itineraries{% endblock %} 
 
 {% block content %}
 
 
-<body class="bg-gray-100 h-screen flex flex-col">
+<nav class="navbar">
+  <div class="logo">
+    <a href="{% url 'home' %}"
+      ><span class="logo-text">The Wandering Pad Thai</span></a
+    >
+  </div>
 
-  <div>
-    <center>
-    {% if itineraries %}
-    <table border="1">
+  <div class="user-acc">
+    <a href="{% url 'home' %}" class="user-acc-button">{{ user.name }}</a>
+  </div>
+</nav>
+
+
+    <!-- {% if itineraries %}
+    <table>
       <thead>
         <tr>
           <th>Title</th>
@@ -27,7 +33,7 @@
           <td>{{ itinerary.title }}</td>
           <td>{{ itinerary.days }}</td>
           <td>{{ itinerary.start_date|default:"Not set" }}</td>
-          <td>{{ itinerary.end_date|default:"Not set" }}</td>
+          <td>{{ itinerary.return_date|default:"Not set" }}</td>
           <td>{{ itinerary.created_at|date:"Y-m-d H:i" }}</td>
         </tr>
         {% endfor %}
@@ -37,8 +43,14 @@
     <p>
       You have no itineraries yet.
     </p>
-    {% endif %}
-</center>
+    {% endif %} -->
+
+
+<section class="trip-form-section">
+  <div class="trip-form-section-content">
+
+
   </div>
-</body>
+</section>
+
 {% endblock %}
