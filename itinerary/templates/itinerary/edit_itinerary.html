@@ -144,604 +144,625 @@
 </script>
 
 <script>
-    // SAVE STATUS MANAGEMENT
-    const saveStatus = document.getElementById('saveStatus');
-    let saveTimeout;
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing modal functionality');
+        
+        // SAVE STATUS MANAGEMENT
+        const saveStatus = document.getElementById('saveStatus');
+        let saveTimeout;
 
-    function showSaveStatus(status, message) {
-        clearTimeout(saveTimeout);
-        
-        saveStatus.className = `save-status ${status}`;
-        saveStatus.textContent = message;
-        
-        if (status === 'saving') {
-            // Don't auto-hide saving status
-            return;
+        function showSaveStatus(status, message) {
+            clearTimeout(saveTimeout);
+            
+            saveStatus.className = `save-status ${status}`;
+            saveStatus.textContent = message;
+            
+            if (status === 'saving') {
+                return;
+            }
+            
+            if (status === 'saved') {
+                saveTimeout = setTimeout(() => {
+                    saveStatus.className = 'save-status';
+                    saveStatus.textContent = 'All changes saved!';
+                }, 2000);
+            } else if (status === 'error') {
+                saveTimeout = setTimeout(() => {
+                    saveStatus.className = 'save-status';
+                    saveStatus.textContent = 'All changes saved!';
+                }, 5000);
+            }
         }
-        
-        if (status === 'saved') {
-            saveTimeout = setTimeout(() => {
-                saveStatus.className = 'save-status';
-                saveStatus.textContent = 'All changes saved!';
-            }, 2000);
-        } else if (status === 'error') {
-            saveTimeout = setTimeout(() => {
-                saveStatus.className = 'save-status';
-                saveStatus.textContent = 'All changes saved!';
-            }, 5000);
-        }
-    }
 
-    // AUTO-SAVE FUNCTIONS
-    async function autoSaveCard(cardData) {
-        showSaveStatus('saving', 'Saving...');
-        
-        try {
-            console.log('Saving card data:', cardData); // Debug log
+        // AUTO-SAVE FUNCTIONS
+        async function autoSaveCard(cardData) {
+            showSaveStatus('saving', 'Saving...');
             
-            const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/save/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken()
-                },
-                body: JSON.stringify(cardData)
-            });
-            
-            const result = await response.json();
-            console.log('Save response:', result); // Debug log
-            
-            if (result.success) {
-                showSaveStatus('saved', 'Saved!');
-                return result.card_id;
-            } else {
+            try {
+                console.log('Saving card data:', cardData);
+                
+                const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/save/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify(cardData)
+                });
+                
+                const result = await response.json();
+                console.log('Save response:', result);
+                
+                if (result.success) {
+                    showSaveStatus('saved', 'Saved!');
+                    return result.card_id;
+                } else {
+                    showSaveStatus('error', 'Save failed');
+                    console.error('Save error:', result.message);
+                    alert('Save failed: ' + result.message);
+                    return null;
+                }
+            } catch (error) {
                 showSaveStatus('error', 'Save failed');
-                console.error('Save error:', result.message);
-                alert('Save failed: ' + result.message); // Show user the error
+                console.error('Network error:', error);
+                alert('Network error: ' + error.message);
                 return null;
             }
-        } catch (error) {
-            showSaveStatus('error', 'Save failed');
-            console.error('Network error:', error);
-            alert('Network error: ' + error.message); // Show user the error
-            return null;
         }
-    }
 
-    async function autoDeleteCard(cardId) {
-        showSaveStatus('saving', 'Deleting...');
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                   document.querySelector('meta[name="csrf-token"]')?.content || '';
+        }
+
+        // Get DOM elements
+        const modal = document.getElementById('placeCardFormModal');
+        const form = document.getElementById('placeCardForm');
+        const cancelBtn = document.getElementById('cancelFormBtn');
+        const deleteBtn = document.getElementById('deleteFormBtn');
+        const placeFormDate = document.getElementById('placeFormDate');
+        const cardIdInput = document.getElementById('cardId');
         
-        try {
-            const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/${cardId}/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': getCsrfToken()
-                }
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showSaveStatus('saved', 'Deleted!');
-                return true;
-            } else {
-                showSaveStatus('error', 'Delete failed');
-                console.error('Delete error:', result.message);
-                return false;
-            }
-        } catch (error) {
-            showSaveStatus('error', 'Delete failed');
-            console.error('Network error:', error);
-            return false;
-        }
-    }
-
-    async function autoSaveCardOrder(cardOrders) {
-        try {
-            const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/update-order/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken()
-                },
-                body: JSON.stringify({ card_orders: cardOrders })
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showSaveStatus('saved', 'Order saved!');
-                return true;
-            } else {
-                console.error('Order save error:', result.message);
-                return false;
-            }
-        } catch (error) {
-            console.error('Network error:', error);
-            return false;
-        }
-    }
-
-    function getCsrfToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-               document.querySelector('meta[name="csrf-token"]')?.content || '';
-    }
-
-    // EXISTING JAVASCRIPT WITH AUTO-SAVE INTEGRATION
-    const modal = document.getElementById('placeCardFormModal');
-    const form = document.getElementById('placeCardForm');
-    const cancelBtn = document.getElementById('cancelFormBtn');
-    const deleteBtn = document.getElementById('deleteFormBtn');
-    const placeFormDate = document.getElementById('placeFormDate');
-    const cardIdInput = document.getElementById('cardId');
-    let editingCard = null;
-
-    // Place search elements
-    const placeSearchInput = document.getElementById('placeSearchInput');
-    const placeSearchResults = document.getElementById('placeSearchResults');
-    const placeNameInput = form.title;
-    const placeIdInput = document.getElementById('placeId');
-    const placeLatInput = document.getElementById('placeLat');
-    const placeLngInput = document.getElementById('placeLng');
-    const placeAddressInput = document.getElementById('placeAddress');
-
-    // Place search functionality
-    let searchTimeout;
-    placeSearchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        const query = this.value.trim();
+        // Place search elements
+        const placeSearchInput = document.getElementById('placeSearchInput');
+        const placeSearchResults = document.getElementById('placeSearchResults');
+        const placeNameInput = form.title;
+        const placeIdInput = document.getElementById('placeId');
+        const placeLatInput = document.getElementById('placeLat');
+        const placeLngInput = document.getElementById('placeLng');
+        const placeAddressInput = document.getElementById('placeAddress');
         
-        if (query.length < 2) {
-            placeSearchResults.classList.add('hidden');
+        let editingCard = null;
+
+        // Check if essential elements exist
+        console.log('Modal:', modal);
+        console.log('Form:', form);
+        
+        if (!modal || !form) {
+            console.error('Essential elements not found!');
             return;
         }
 
-        searchTimeout = setTimeout(() => {
-            searchPlaces(query);
-        }, 300);
-    });
-
-    function searchPlaces(query) {
-        if (!window.autocompleteService) {
-            console.error('Google Places API not loaded yet');
-            return;
-        }
-
-        const request = {
-            input: query,
-            location: new google.maps.LatLng(13.7563, 100.5018),
-            radius: 30000,
-            componentRestrictions: { country: 'th' }
-        };
-
-        window.autocompleteService.getPlacePredictions(request, (predictions, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-                displaySearchResults(predictions);
-            } else {
-                placeSearchResults.classList.add('hidden');
-            }
-        });
-    }
-
-    function displaySearchResults(predictions) {
-        placeSearchResults.innerHTML = '';
-        placeSearchResults.classList.remove('hidden');
-
-        predictions.forEach(prediction => {
-            const resultItem = document.createElement('div');
-            resultItem.className = 'place-search-result-item';
-            resultItem.innerHTML = `
-                <div class="place-name">${prediction.structured_formatting.main_text}</div>
-                <div class="place-address">${prediction.structured_formatting.secondary_text || ''}</div>
-            `;
-
-            resultItem.addEventListener('click', () => {
-                selectPlace(prediction);
-            });
-
-            placeSearchResults.appendChild(resultItem);
-        });
-    }
-
-    function selectPlace(prediction) {
-        const request = {
-            placeId: prediction.place_id,
-            fields: ['name', 'formatted_address', 'geometry', 'place_id']
-        };
-
-        window.placesService.getDetails(request, (place, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                placeNameInput.value = place.name;
-                placeIdInput.value = place.place_id;
-                placeLatInput.value = place.geometry.location.lat();
-                placeLngInput.value = place.geometry.location.lng();
-                placeAddressInput.value = place.formatted_address;
-                placeSearchInput.value = place.name;
-                placeSearchResults.classList.add('hidden');
-                
-                showFeedbackBanner('✓ Place selected: ' + place.name);
-            }
-        });
-    }
-
-    function showFeedbackBanner(message) {
-        const existingBanner = document.querySelector('.feedback-banner');
-        if (existingBanner) {
-            existingBanner.remove();
-        }
-
-        const banner = document.createElement('div');
-        banner.className = 'feedback-banner';
-        banner.textContent = message;
-        
-        form.insertBefore(banner, form.firstChild);
-
-        setTimeout(() => {
-            banner.style.opacity = '0';
-            setTimeout(() => {
-                banner.remove();
-            }, 300);
-        }, 2700);
-    }
-
-    // Hide search results when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!placeSearchInput.contains(e.target) && !placeSearchResults.contains(e.target)) {
-            placeSearchResults.classList.add('hidden');
-        }
-    });
-
-    // Show modal for adding new place
-    document.querySelectorAll('.itinerary_column_add_placeCard').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const column = btn.closest('.itinerary_column');
-            const date = column.dataset.date;
-
-            editingCard = null;
-            form.reset();
+        // Function to clear Google Places data
+        function clearGooglePlacesData() {
+            console.log('Clearing Google Places data');
+            placeIdInput.value = '';
+            placeLatInput.value = '';
+            placeLngInput.value = '';
+            placeAddressInput.value = '';
             placeSearchInput.value = '';
             placeSearchResults.classList.add('hidden');
-            cardIdInput.value = '';
+        }
 
-            placeFormDate.value = date;
+        // Show modal for adding new place
+        console.log('Setting up add place button listeners');
+        document.querySelectorAll('.itinerary_column_add_placeCard').forEach((btn, index) => {
+            console.log(`Setting up listener for button ${index}`);
+            
+            btn.addEventListener('click', function(e) {
+                console.log('Add place button clicked!');
+                e.preventDefault();
+                
+                const column = btn.closest('.itinerary_column');
+                const date = column.dataset.date;
+                console.log('Date:', date);
 
-            document.querySelector('#placeCardForm h3').textContent = 'Add New Place';
-            document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Save Place';
-            deleteBtn.style.display = 'none';
+                // Reset form and state
+                editingCard = null;
+                form.reset();
+                cardIdInput.value = '';
+                clearGooglePlacesData();
+                
+                placeFormDate.value = date;
 
-            modal.classList.remove('hidden');
+                // Update modal content for adding
+                document.querySelector('#placeCardForm h3').textContent = 'Add New Place';
+                document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Save Place';
+                deleteBtn.style.display = 'none';
+
+                // Show modal
+                console.log('Showing modal...');
+                modal.classList.remove('hidden');
+                console.log('Modal classes:', modal.className);
+            });
         });
-    });
 
-    // Handle form submission with auto-save
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Calculate order for new cards
-        let order = 0;
-        if (!editingCard) {
-            // For new cards, find the highest order in the target column
-            const targetColumn = document.querySelector(`.itinerary_column[data-date="${this.date.value}"]`);
-            const existingCards = targetColumn.querySelectorAll('.place_card');
-            order = existingCards.length; // This will put it at the end
-        } else {
-            // For existing cards, get current position
-            const currentColumn = editingCard.closest('.itinerary_column');
-            const cards = [...currentColumn.querySelectorAll('.place_card')];
-            order = cards.indexOf(editingCard);
-        }
-
-        const cardData = {
-            card_id: cardIdInput.value || null,
-            title: this.title.value || '',
-            start_time: this.time.value || '',
-            end_time: this.end_time.value || '',
-            notes: this.notes.value || '',
-            date: this.date.value,
-            place_id: this.place_id.value || '',
-            place_lat: this.place_lat.value || '',
-            place_lng: this.place_lng.value || '',
-            place_address: this.place_address.value || '',
-            original_place_name: placeSearchInput.value || this.title.value || '',
-            order: order
-        };
-
-        console.log('Form submission - card data:', cardData); // Debug log
-        console.log('Form values check:');
-        console.log('- title:', this.title.value);
-        console.log('- time:', this.time.value);
-        console.log('- end_time:', this.end_time.value);
-        console.log('- notes:', this.notes.value);
-        console.log('- place_id:', this.place_id.value);
-        console.log('- place_lat:', this.place_lat.value);
-        console.log('- place_lng:', this.place_lng.value);
-        console.log('- place_address:', this.place_address.value);
-        console.log('- placeSearchInput:', placeSearchInput.value);
-
-        const savedCardId = await autoSaveCard(cardData);
-        
-        if (!savedCardId) {
-            // Save failed, don't update UI
-            console.error('Save failed, not updating UI');
-            return;
-        }
-
-        console.log('Save successful, updating UI with card ID:', savedCardId); // Debug log
-
-        // Format time display
-        let timeDisplay = '';
-        if (cardData.start_time && cardData.end_time) {
-            timeDisplay = `${cardData.start_time} - ${cardData.end_time}`;
-        } else if (cardData.start_time) {
-            timeDisplay = `${cardData.start_time}`;
-        } else if (cardData.end_time) {
-            timeDisplay = `Until ${cardData.end_time}`;
-        }
-
-        if (editingCard) {
-            // UPDATE EXISTING CARD
-            let cardHTML = `
-                <div class="drag-handle">⋮⋮</div>
-                <strong>${cardData.title}</strong><br>`;
-            
-            if (timeDisplay) {
-                cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
-            }
-            
-            if (cardData.notes) {
-                cardHTML += `<p>${cardData.notes}</p>`;
-            }
-            
-            editingCard.innerHTML = cardHTML;
-
-            // Update data attributes
-            editingCard.dataset.cardId = savedCardId;
-            editingCard.dataset.placeId = cardData.place_id || '';
-            editingCard.dataset.placeLat = cardData.place_lat || '';
-            editingCard.dataset.placeLng = cardData.place_lng || '';
-            editingCard.dataset.placeAddress = cardData.place_address || '';
-            editingCard.dataset.originalPlaceName = cardData.original_place_name || '';
-            editingCard.dataset.startTime = cardData.start_time || '';
-            editingCard.dataset.endTime = cardData.end_time || '';
-
-            // Move card if date changed
-            const currentColumn = editingCard.closest('.itinerary_column');
-            const currentDate = currentColumn.dataset.date;
-            
-            if (currentDate !== cardData.date) {
-                const newColumn = document.querySelector(`.itinerary_column[data-date="${cardData.date}"]`);
-                const newContainer = newColumn.querySelector('.place_cards_container');
-                newContainer.appendChild(editingCard);
-            }
-
+        // Cancel button
+        cancelBtn.addEventListener('click', function() {
+            console.log('Cancel button clicked');
+            form.reset();
+            clearGooglePlacesData();
             editingCard = null;
-        } else {
-            // CREATE NEW CARD
-            const column = document.querySelector(`.itinerary_column[data-date="${cardData.date}"]`);
-            const container = column.querySelector('.place_cards_container');
+            modal.classList.add('hidden');
+        });
 
-            const card = document.createElement('div');
-            card.classList.add('place_card');
-            card.draggable = true;
-            
-            // Store data attributes
-            card.dataset.cardId = savedCardId;
-            card.dataset.placeId = cardData.place_id || '';
-            card.dataset.placeLat = cardData.place_lat || '';
-            card.dataset.placeLng = cardData.place_lng || '';
-            card.dataset.placeAddress = cardData.place_address || '';
-            card.dataset.originalPlaceName = cardData.original_place_name || '';
-            card.dataset.startTime = cardData.start_time || '';
-            card.dataset.endTime = cardData.end_time || '';
-            
-            let cardHTML = `
-                <div class="drag-handle">⋮⋮</div>
-                <strong>${cardData.title}</strong><br>`;
-            
-            if (timeDisplay) {
-                cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
+        // Close when clicking outside the form
+        modal.addEventListener('click', function(event) {
+            if (!form.contains(event.target)) {
+                console.log('Clicked outside form, closing modal');
+                form.reset();
+                clearGooglePlacesData();
+                editingCard = null;
+                modal.classList.add('hidden');
             }
-            
-            if (cardData.notes) {
-                cardHTML += `<p>${cardData.notes}</p>`;
-            }
-            
-            card.innerHTML = cardHTML;
+        });
 
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+
+            // Calculate order for new cards
+            let order = 0;
+            if (!editingCard) {
+                const targetColumn = document.querySelector(`.itinerary_column[data-date="${this.date.value}"]`);
+                const existingCards = targetColumn.querySelectorAll('.place_card');
+                order = existingCards.length;
+            }
+
+            const cardData = {
+                card_id: cardIdInput.value || '',
+                title: this.title.value || '',
+                start_time: this.time.value || '',
+                end_time: this.end_time.value || '',
+                notes: this.notes.value || '',
+                date: this.date.value,
+                place_id: placeIdInput.value || '',
+                place_lat: placeLatInput.value || '',
+                place_lng: placeLngInput.value || '',
+                place_address: placeAddressInput.value || '',
+                original_place_name: placeSearchInput.value || this.title.value || '',
+                order: order
+            };
+
+            console.log('Card data to save:', cardData);
+
+            const savedCardId = await autoSaveCard(cardData);
+            
+            if (!savedCardId) {
+                console.error('Save failed, not updating UI');
+                return;
+            }
+
+            // Create/Update the card in UI
+            if (editingCard) {
+                // UPDATE EXISTING CARD
+                let cardHTML = `
+                    <div class="drag-handle">⋮⋮</div>
+                    <strong>${cardData.title}</strong><br>`;
+                
+                let timeDisplay = '';
+                if (cardData.start_time && cardData.end_time) {
+                    timeDisplay = `${cardData.start_time} - ${cardData.end_time}`;
+                } else if (cardData.start_time) {
+                    timeDisplay = `${cardData.start_time}`;
+                } else if (cardData.end_time) {
+                    timeDisplay = `Until ${cardData.end_time}`;
+                }
+                
+                if (timeDisplay) {
+                    cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
+                }
+                
+                if (cardData.notes) {
+                    cardHTML += `<p>${cardData.notes}</p>`;
+                }
+                
+                editingCard.innerHTML = cardHTML;
+
+                // Update data attributes
+                editingCard.dataset.cardId = savedCardId;
+                editingCard.dataset.placeId = cardData.place_id || '';
+                editingCard.dataset.placeLat = cardData.place_lat || '';
+                editingCard.dataset.placeLng = cardData.place_lng || '';
+                editingCard.dataset.placeAddress = cardData.place_address || '';
+                editingCard.dataset.originalPlaceName = cardData.original_place_name || '';
+                editingCard.dataset.startTime = cardData.start_time || '';
+                editingCard.dataset.endTime = cardData.end_time || '';
+
+                // Move card if date changed
+                const currentColumn = editingCard.closest('.itinerary_column');
+                const currentDate = currentColumn.dataset.date;
+                
+                if (currentDate !== cardData.date) {
+                    const newColumn = document.querySelector(`.itinerary_column[data-date="${cardData.date}"]`);
+                    const newContainer = newColumn.querySelector('.place_cards_container');
+                    newContainer.appendChild(editingCard);
+                }
+
+                editingCard = null;
+            } else {
+                // CREATE NEW CARD
+                const column = document.querySelector(`.itinerary_column[data-date="${cardData.date}"]`);
+                const container = column.querySelector('.place_cards_container');
+
+                const card = document.createElement('div');
+                card.classList.add('place_card');
+                card.draggable = true;
+                
+                // Store all data attributes
+                card.dataset.cardId = savedCardId;
+                card.dataset.placeId = cardData.place_id || '';
+                card.dataset.placeLat = cardData.place_lat || '';
+                card.dataset.placeLng = cardData.place_lng || '';
+                card.dataset.placeAddress = cardData.place_address || '';
+                card.dataset.originalPlaceName = cardData.original_place_name || '';
+                card.dataset.startTime = cardData.start_time || '';
+                card.dataset.endTime = cardData.end_time || '';
+                
+                let cardHTML = `<div class="drag-handle">⋮⋮</div><strong>${cardData.title}</strong><br>`;
+                
+                let timeDisplay = '';
+                if (cardData.start_time && cardData.end_time) {
+                    timeDisplay = `${cardData.start_time} - ${cardData.end_time}`;
+                } else if (cardData.start_time) {
+                    timeDisplay = `${cardData.start_time}`;
+                } else if (cardData.end_time) {
+                    timeDisplay = `Until ${cardData.end_time}`;
+                }
+                
+                if (timeDisplay) {
+                    cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
+                }
+                
+                if (cardData.notes) {
+                    cardHTML += `<p>${cardData.notes}</p>`;
+                }
+                
+                card.innerHTML = cardHTML;
+
+                // Add drag and edit listeners to new card
+                addDragListeners(card);
+                addEditListener(card);
+
+                container.appendChild(card);
+            }
+
+            // Reset and hide form
+            this.reset();
+            clearGooglePlacesData();
+            modal.classList.add('hidden');
+        });
+
+        console.log('Modal setup complete');
+
+        // GOOGLE PLACES SEARCH FUNCTIONALITY
+        let searchTimeout;
+        
+        placeSearchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                placeSearchResults.classList.add('hidden');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                searchPlaces(query);
+            }, 300);
+        });
+
+        function searchPlaces(query) {
+            if (!window.autocompleteService) {
+                console.error('Google Places API not loaded yet');
+                return;
+            }
+
+            const request = {
+                input: query,
+                location: new google.maps.LatLng(13.7563, 100.5018),
+                radius: 30000,
+                componentRestrictions: { country: 'th' }
+            };
+
+            window.autocompleteService.getPlacePredictions(request, (predictions, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+                    displaySearchResults(predictions);
+                } else {
+                    placeSearchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        function displaySearchResults(predictions) {
+            placeSearchResults.innerHTML = '';
+            placeSearchResults.classList.remove('hidden');
+
+            predictions.forEach(prediction => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'place-search-result-item';
+                resultItem.innerHTML = `
+                    <div class="place-name">${prediction.structured_formatting.main_text}</div>
+                    <div class="place-address">${prediction.structured_formatting.secondary_text || ''}</div>
+                `;
+
+                resultItem.addEventListener('click', () => {
+                    selectPlace(prediction);
+                });
+
+                placeSearchResults.appendChild(resultItem);
+            });
+        }
+
+        function selectPlace(prediction) {
+            const request = {
+                placeId: prediction.place_id,
+                fields: ['name', 'formatted_address', 'geometry', 'place_id']
+            };
+
+            window.placesService.getDetails(request, (place, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    placeNameInput.value = place.name;
+                    placeIdInput.value = place.place_id;
+                    placeLatInput.value = place.geometry.location.lat();
+                    placeLngInput.value = place.geometry.location.lng();
+                    placeAddressInput.value = place.formatted_address;
+                    placeSearchInput.value = place.name;
+                    placeSearchResults.classList.add('hidden');
+                    
+                    showFeedbackBanner('✓ Google Place selected: ' + place.name);
+                }
+            });
+        }
+
+        function showFeedbackBanner(message) {
+            const existingBanner = document.querySelector('.feedback-banner');
+            if (existingBanner) {
+                existingBanner.remove();
+            }
+
+            const banner = document.createElement('div');
+            banner.className = 'feedback-banner';
+            banner.textContent = message;
+            
+            form.insertBefore(banner, form.firstChild);
+
+            setTimeout(() => {
+                banner.style.opacity = '0';
+                setTimeout(() => {
+                    banner.remove();
+                }, 300);
+            }, 2700);
+        }
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!placeSearchInput.contains(e.target) && !placeSearchResults.contains(e.target)) {
+                placeSearchResults.classList.add('hidden');
+            }
+        });
+
+        // DRAG AND DROP FUNCTIONALITY
+        let draggedElement = null;
+
+        function addDragListeners(card) {
+            card.addEventListener('dragstart', function(e) {
+                draggedElement = this;
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            card.addEventListener('dragend', function(e) {
+                this.classList.remove('dragging');
+                draggedElement = null;
+            });
+        }
+
+        function addEditListener(card) {
+            card.addEventListener('click', function(e) {
+                if (this.classList.contains('dragging')) return;
+                if (e.target.classList.contains('drag-handle')) return;
+
+                editingCard = this;
+
+                const strong = this.querySelector('strong').textContent;
+                const timeSpan = this.querySelector('.time-span');
+                const p = this.querySelector('p');
+                const currentColumn = this.closest('.itinerary_column');
+                const currentDate = currentColumn.dataset.date;
+
+                // Pre-fill form
+                form.title.value = strong;
+                form.time.value = this.dataset.startTime || '';
+                form.end_time.value = this.dataset.endTime || '';
+                form.notes.value = p ? p.textContent : '';
+                placeFormDate.value = currentDate;
+                cardIdInput.value = this.dataset.cardId || '';
+
+                // Pre-fill place data
+                placeIdInput.value = this.dataset.placeId || '';
+                placeLatInput.value = this.dataset.placeLat || '';
+                placeLngInput.value = this.dataset.placeLng || '';
+                placeAddressInput.value = this.dataset.placeAddress || '';
+                
+                if (this.dataset.placeId && this.dataset.originalPlaceName) {
+                    placeSearchInput.value = this.dataset.originalPlaceName;
+                } else if (this.dataset.placeId) {
+                    placeSearchInput.value = strong;
+                } else {
+                    placeSearchInput.value = '';
+                }
+
+                // Update modal for edit mode
+                document.querySelector('#placeCardForm h3').textContent = 'Edit Place';
+                document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Update Place';
+                deleteBtn.style.display = 'inline-block';
+
+                modal.classList.remove('hidden');
+            });
+        }
+
+        // Add listeners to existing cards
+        document.querySelectorAll('.place_card').forEach(card => {
             addDragListeners(card);
             addEditListener(card);
-
-            container.appendChild(card);
-        }
-
-        // Reset and hide form
-        this.reset();
-        placeSearchInput.value = '';
-        modal.classList.add('hidden');
-    });
-
-    // Cancel button
-    cancelBtn.addEventListener('click', function() {
-        form.reset();
-        placeSearchInput.value = '';
-        placeSearchResults.classList.add('hidden');
-        editingCard = null;
-        modal.classList.add('hidden');
-    });
-
-    // Delete button with auto-save
-    deleteBtn.addEventListener('click', async function() {
-        if (editingCard && confirm('Are you sure you want to delete this place?')) {
-            const cardId = editingCard.dataset.cardId;
-            
-            if (cardId) {
-                const success = await autoDeleteCard(cardId);
-                if (!success) {
-                    return; // Don't remove from UI if delete failed
-                }
-            }
-            
-            editingCard.remove();
-            form.reset();
-            placeSearchInput.value = '';
-            editingCard = null;
-            modal.classList.add('hidden');
-        }
-    });
-
-    // Close when clicking outside the form
-    modal.addEventListener('click', function(event) {
-        if (!form.contains(event.target)) {
-            form.reset();
-            placeSearchInput.value = '';
-            placeSearchResults.classList.add('hidden');
-            editingCard = null;
-            modal.classList.add('hidden');
-        }
-    });
-
-    // DRAG AND DROP FUNCTIONALITY WITH AUTO-SAVE
-    let draggedElement = null;
-
-    function addDragListeners(card) {
-        card.addEventListener('dragstart', function(e) {
-            draggedElement = this;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
         });
 
-        card.addEventListener('dragend', function(e) {
-            this.classList.remove('dragging');
-            draggedElement = null;
-        });
-    }
-
-    function addEditListener(card) {
-        card.addEventListener('click', function(e) {
-            if (this.classList.contains('dragging')) return;
-            if (e.target.classList.contains('drag-handle')) return;
-
-            editingCard = this;
-
-            const strong = this.querySelector('strong').textContent;
-            const timeSpan = this.querySelector('.time-span');
-            const p = this.querySelector('p');
-            const currentColumn = this.closest('.itinerary_column');
-            const currentDate = currentColumn.dataset.date;
-
-            // Pre-fill form
-            form.title.value = strong;
-            form.time.value = this.dataset.startTime || '';
-            form.end_time.value = this.dataset.endTime || '';
-            form.notes.value = p ? p.textContent : '';
-            placeFormDate.value = currentDate;
-            cardIdInput.value = this.dataset.cardId || '';
-
-            // Pre-fill place data
-            placeIdInput.value = this.dataset.placeId || '';
-            placeLatInput.value = this.dataset.placeLat || '';
-            placeLngInput.value = this.dataset.placeLng || '';
-            placeAddressInput.value = this.dataset.placeAddress || '';
-            
-            if (this.dataset.placeId && this.dataset.originalPlaceName) {
-                placeSearchInput.value = this.dataset.originalPlaceName;
-            } else if (this.dataset.placeId) {
-                placeSearchInput.value = strong;
-            } else {
-                placeSearchInput.value = '';
-            }
-
-            // Update modal for edit mode
-            document.querySelector('#placeCardForm h3').textContent = 'Edit Place';
-            document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Update Place';
-            deleteBtn.style.display = 'inline-block';
-
-            modal.classList.remove('hidden');
-        });
-    }
-
-    // Add listeners to existing cards
-    document.querySelectorAll('.place_card').forEach(card => {
-        addDragListeners(card);
-        addEditListener(card);
-    });
-
-    // Make containers drop zones with auto-save
-    document.querySelectorAll('.place_cards_container').forEach(container => {
-        container.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            
-            const afterElement = getDragAfterElement(container, e.clientY);
-            const dragging = document.querySelector('.dragging');
-            
-            if (afterElement == null) {
-                container.appendChild(dragging);
-            } else {
-                container.insertBefore(dragging, afterElement);
-            }
-        });
-
-        container.addEventListener('drop', async function(e) {
-            e.preventDefault();
-            
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
+        // Delete button functionality
+        deleteBtn.addEventListener('click', async function() {
+            if (editingCard && confirm('Are you sure you want to delete this place?')) {
+                const cardId = editingCard.dataset.cardId;
                 
-                // Auto-save the new order
-                await saveCardOrderAfterDrop();
+                if (cardId) {
+                    const success = await autoDeleteCard(cardId);
+                    if (!success) {
+                        return;
+                    }
+                }
+                
+                editingCard.remove();
+                form.reset();
+                clearGooglePlacesData();
+                editingCard = null;
+                modal.classList.add('hidden');
             }
         });
-    });
 
-    // Save card order after drag and drop
-    async function saveCardOrderAfterDrop() {
-        const cardOrders = [];
-        
-        document.querySelectorAll('.itinerary_column').forEach(column => {
-            const date = column.dataset.date;
-            const cards = column.querySelectorAll('.place_card');
+        // Auto-delete function
+        async function autoDeleteCard(cardId) {
+            showSaveStatus('saving', 'Deleting...');
             
-            cards.forEach((card, index) => {
-                const cardId = card.dataset.cardId;
-                if (cardId) {
-                    cardOrders.push({
-                        card_id: parseInt(cardId),
-                        date: date,
-                        order: index
-                    });
+            try {
+                const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/${cardId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSaveStatus('saved', 'Deleted!');
+                    return true;
+                } else {
+                    showSaveStatus('error', 'Delete failed');
+                    console.error('Delete error:', result.message);
+                    return false;
+                }
+            } catch (error) {
+                showSaveStatus('error', 'Delete failed');
+                console.error('Network error:', error);
+                return false;
+            }
+        }
+
+        // Make containers drop zones
+        document.querySelectorAll('.place_cards_container').forEach(container => {
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                const afterElement = getDragAfterElement(container, e.clientY);
+                const dragging = document.querySelector('.dragging');
+                
+                if (afterElement == null) {
+                    container.appendChild(dragging);
+                } else {
+                    container.insertBefore(dragging, afterElement);
+                }
+            });
+
+            container.addEventListener('drop', async function(e) {
+                e.preventDefault();
+                
+                if (draggedElement) {
+                    draggedElement.classList.remove('dragging');
+                    await saveCardOrderAfterDrop();
                 }
             });
         });
-        
-        if (cardOrders.length > 0) {
-            await autoSaveCardOrder(cardOrders);
-        }
-    }
 
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.place_card:not(.dragging)')];
-        
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.place_card:not(.dragging)')];
             
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
 
-    // Add CSRF token to page (add this to your base template)
-    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = '{{ csrf_token }}';
-        document.body.appendChild(csrfInput);
-    }
+        async function saveCardOrderAfterDrop() {
+            const cardOrders = [];
+            
+            document.querySelectorAll('.itinerary_column').forEach(column => {
+                const date = column.dataset.date;
+                const cards = column.querySelectorAll('.place_card');
+                
+                cards.forEach((card, index) => {
+                    const cardId = card.dataset.cardId;
+                    if (cardId) {
+                        cardOrders.push({
+                            card_id: parseInt(cardId),
+                            date: date,
+                            order: index
+                        });
+                    }
+                });
+            });
+            
+            if (cardOrders.length > 0) {
+                await autoSaveCardOrder(cardOrders);
+            }
+        }
+
+        async function autoSaveCardOrder(cardOrders) {
+            try {
+                const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/update-order/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ card_orders: cardOrders })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSaveStatus('saved', 'Order saved!');
+                    return true;
+                } else {
+                    console.error('Order save error:', result.message);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                return false;
+            }
+        }
+    });
 </script>
+
+<!-- Add CSRF token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
 {% endblock %}
