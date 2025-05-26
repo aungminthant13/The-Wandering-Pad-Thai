@@ -53,7 +53,7 @@
                 <div id="placeSearchResults" class="place-search-results hidden"></div>
             </div>
             
-            <input type="text" name="place_name" placeholder="Place Name" required>
+            <input type="text" name="title" placeholder="Place Name" required>
             <div class="time-inputs">
                 <div class="time-input-group">
                     <label for="start_time">Start at</label>
@@ -115,7 +115,7 @@
     // NEW: Place search elements
     const placeSearchInput = document.getElementById('placeSearchInput');
     const placeSearchResults = document.getElementById('placeSearchResults');
-    const placeNameInput = form.place_name;
+    const placeNameInput = form.title;
     const placeIdInput = document.getElementById('placeId');
     const placeLatInput = document.getElementById('placeLat');
     const placeLngInput = document.getElementById('placeLng');
@@ -267,7 +267,7 @@
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const placeName = this.place_name.value;
+        const placeName = this.title.value;
         const time = this.time.value;
         const endTime = this.end_time.value;
         const notes = this.notes.value;
@@ -435,15 +435,15 @@
 
             // Get current card data
             const strong = this.querySelector('strong').textContent;
-            const timeSpan = this.querySelector('.time-span').textContent;
-            const p = this.querySelector('p').textContent;
+            const timeSpan = this.querySelector('.time-span');
+            const p = this.querySelector('p');
             const currentColumn = this.closest('.itinerary_column');
             const currentDate = currentColumn.dataset.date;
 
             // Pre-fill form
-            form.place_name.value = strong;
+            form.title.value = strong;
             
-            // Extract start and end times from the time span
+            // Extract start and end times from the data attributes
             if (this.dataset.startTime) {
                 form.time.value = this.dataset.startTime;
             } else {
@@ -456,7 +456,7 @@
                 form.end_time.value = '';
             }
             
-            form.notes.value = p === 'No notes' ? '' : p;
+            form.notes.value = p ? p.textContent : '';
             placeFormDate.value = currentDate;
 
             // Pre-fill place data if available

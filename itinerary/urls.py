@@ -1,13 +1,15 @@
 from django.urls import path
-from .views import create_itinerary, recommended_places, edit_itinerary
+from .views import create_itinerary, edit_itinerary
+from . import views
 
 app_name = 'itinerary'
 
 urlpatterns = [
     path('create_itinerary/', create_itinerary, name='create_itinerary'),
-    path('recommended_places/<int:itinerary_id>/', recommended_places, name='recommended_places'),
-    # path("trip/<int:trip_id>/recommended/api/", fetch_recommended_places, name="fetch_recommended_places"),
-
     path('edit_itinerary/<int:itinerary_id>/', edit_itinerary, name='edit_itinerary'),
-    # path('create_itinerary/', create_main_itin, name='create_main_itin'),
+
+    #itineraray place card edit/ delete
+    path('<int:itinerary_id>/place-cards/save/', views.save_place_card, name='save_place_card'),
+    path('<int:itinerary_id>/place-cards/<int:card_id>/delete/', views.delete_place_card, name='delete_place_card'),
+    path('<int:itinerary_id>/place-cards/update-order/', views.update_card_order, name='update_card_order'),
 ]

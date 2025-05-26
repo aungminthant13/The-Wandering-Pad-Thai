@@ -1,5 +1,4 @@
-{% extends "home/base.html" %}
-{% block title %}Home{% endblock %}
+{% extends "home/base.html" %} {% block title %}Home{% endblock %} 
 
 {% block content %}
 
@@ -16,17 +15,18 @@
   </div>
 </nav>
 
-
 <!-- trip form section -->
-
 <section class="trip-form-section">
   <div class="trip-form-section-content">
     <div class="trip-form">
-
       <div class="trip-title-section">
         <div class="label">Title</div>
         <div class="input-field">
-          <input type="text" id="tripTitle" placeholder="e.g. BKK for Songkran">
+          <input
+            type="text"
+            id="tripTitle"
+            placeholder="e.g. BKK for Songkran"
+          />
         </div>
       </div>
 
@@ -34,94 +34,148 @@
         <div class="start-date-section">
           <div class="label">Start Date</div>
           <div class="input-field">
-            <input type="date" id="startDate" required>
+            <input type="date" id="startDate" required />
           </div>
         </div>
 
         <div class="return-date-section">
           <div class="label">Return Date</div>
           <div class="input-field">
-            <input type="date" id="returnDate" required>
+            <input type="date" id="returnDate" required />
           </div>
         </div>
       </div>
-      
+
       <div class="trip-duration">
         <div class="label">Trip Duration</div>
         <div id="tripDurationValue">0 days</div>
       </div>
-
     </div>
 
-    <button type="submit" class="trip-get-started-btn" id="getStartedBtn">Get started</button>
+    <button type="submit" class="trip-get-started-btn" id="getStartedBtn">
+      Get started
+    </button>
   </div>
 </section>
 
-
-
-
-
-<!-- homepage design -->
-<script src="/static/js/homePage.js"></script>
-
 <!-- send date to server using AJAX -->
 <script>
-  
-  document.getElementById("getStartedBtn").addEventListener("click", function () {
-    let tripTitle = document.getElementById("tripTitle").value;
-    let startDate = document.getElementById("startDate").value;
-    let returnDate = document.getElementById("returnDate").value;
-    let tripDurationText = document.getElementById("tripDurationValue").textContent;
+  document.addEventListener("DOMContentLoaded", function () {
+    const startDateInput = document.getElementById("startDate");
+    const returnDateInput = document.getElementById("returnDate");
+    const tripDurationValue = document.getElementById("tripDurationValue");
 
-    if (!tripTitle){
-      tripTitle = "bangkok!";
+    // Set min date for both inputs to today
+    const today = new Date();
+    const todayFormatted = today.toISOString().split("T")[0];
+    startDateInput.min = todayFormatted;
+    returnDateInput.min = todayFormatted;
+
+    // Function to calculate trip duration
+    function calculateDuration() {
+      const startDate = new Date(startDateInput.value);
+      const returnDate = new Date(returnDateInput.value);
+
+      if (startDate && returnDate && !isNaN(startDate) && !isNaN(returnDate)) {
+        if (returnDate < startDate) {
+          tripDurationValue.textContent =
+            "Return date must be after start date";
+          tripDurationValue.style.color = "red";
+          return false;
+        }
+
+        // Calculate the difference in days (inclusive of both start and end dates)
+        const diffTime = Math.abs(returnDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to make it inclusive
+
+        tripDurationValue.textContent =
+          diffDays + (diffDays === 1 ? " day" : " days");
+        tripDurationValue.style.color = "black";
+        return true;
+      } else {
+        tripDurationValue.textContent = "Please select both dates";
+        tripDurationValue.style.color = "grey";
+        return false;
+      }
     }
 
-    if (!startDate || !returnDate || tripDurationText.includes("Please") || tripDurationText.includes("Return date must")) {
-        alert("Please fill in all fields correctly.");
-        return;
-    }
+    // Add event listeners to date inputs
+    startDateInput.addEventListener("change", function () {
+      calculateDuration();
+      // Update min date for return input
+      returnDateInput.min = startDateInput.value;
+    });
 
-    let tripDuration = parseInt(tripDurationText);
+    returnDateInput.addEventListener("change", calculateDuration);
 
-    fetch("/itinerary/create_itinerary/", {
-        method: "POST",
-        headers: {
+    // Handle form submission
+    document
+      .getElementById("getStartedBtn")
+      .addEventListener("click", function () {
+        let tripTitle = document.getElementById("tripTitle").value;
+        let startDate = document.getElementById("startDate").value;
+        let returnDate = document.getElementById("returnDate").value;
+        let tripDurationText =
+          document.getElementById("tripDurationValue").textContent;
+
+        // Default title if empty
+        if (!tripTitle) {
+          tripTitle = "My Bangkok Trip";
+        }
+
+        // Validation
+        if (
+          !startDate ||
+          !returnDate ||
+          tripDurationText.includes("Please") ||
+          tripDurationText.includes("Return date must")
+        ) {
+          alert("Please fill in all fields correctly.");
+          return;
+        }
+
+        // Create itinerary
+        fetch("/itinerary/create_itinerary/", {
+          method: "POST",
+          headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCSRFToken()  // CSRF protection
-        },
-        body: JSON.stringify({
+            "X-CSRFToken": getCSRFToken(),
+          },
+          body: JSON.stringify({
             trip_title: tripTitle,
             start_date: startDate,
             return_date: returnDate,
-            trip_duration: tripDuration  // Send as integer
+            // Don't send trip_duration - it's calculated automatically
+          }),
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = `/itinerary/edit_itinerary/${data.itinerary_id}/`;
-        } else {
-            alert(data.message);
-        }
-    })
-    .catch(error => console.error("Error:", error));
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              window.location.href = `/itinerary/edit_itinerary/${data.itinerary_id}/`;
+            } else {
+              alert(data.message || "Error creating itinerary");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Error creating itinerary. Please try again.");
+          });
+      });
   });
 
-
-// Function to get CSRF token
-function getCSRFToken() {
+  // Function to get CSRF token
+  function getCSRFToken() {
     let cookieValue = null;
-    const cookies = document.cookie.split(';');
+    const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i].trim();
-        if (cookie.startsWith("csrftoken=")) {
-            cookieValue = cookie.substring("csrftoken=".length, cookie.length);
-            break;
-        }
+      let cookie = cookies[i].trim();
+      if (cookie.startsWith("csrftoken=")) {
+        cookieValue = cookie.substring("csrftoken=".length, cookie.length);
+        break;
+      }
     }
     return cookieValue;
-}
+  }
 </script>
 
 {% endblock %}
