@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_itinerary, edit_itinerary
+from .views import create_itinerary, edit_itinerary, save_itinerary
 from . import views
 
 app_name = 'itinerary'
@@ -7,6 +7,7 @@ app_name = 'itinerary'
 urlpatterns = [
     path('create_itinerary/', create_itinerary, name='create_itinerary'),
     path('edit_itinerary/<int:itinerary_id>/', edit_itinerary, name='edit_itinerary'),
+    path('save_itinerary/<int:itinerary_id>/', save_itinerary, name='save_itinerary'),
 
     #itineraray place card edit/ delete
     path('<int:itinerary_id>/place-cards/save/', views.save_place_card, name='save_place_card'),

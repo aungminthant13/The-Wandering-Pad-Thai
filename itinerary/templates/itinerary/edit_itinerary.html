@@ -12,6 +12,10 @@
         ><span class="logo-text">The Wandering Pad Thai</span></a
       >
     </div>
+    
+    <div class="user-acc">
+        <a href="{% url 'home' %}" class="user-acc-button">Next</a>
+    </div>
 </nav>
 
 <section>
@@ -20,16 +24,15 @@
         <div class="trip_title">
             {{ itinerary.title }}
             <span id="saveStatus" class="save-status">All changes saved!</span>
-         </div>
+         </div> <br>
          <div class="trip_dates">
             <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
          </div>
      </div>
-</section>
 
-<!-- View toggle switch -->
-<div class="view-toggle-container">
-    <div class="view-toggle">
+     <!-- View toggle switch -->
+    <div class="view-toggle-container">
+        <div class="view-toggle">
         <input type="checkbox" id="viewToggle" class="toggle-checkbox">
         <label for="viewToggle" class="toggle-label">
             <span class="toggle-text-left">Board</span>
@@ -38,6 +41,8 @@
         </label>
     </div>
 </div>
+</section>
+
 
 <!-- itinerary board -->
 <section id="boardView">
@@ -243,7 +248,7 @@
                     map: map,
                     title: title,
                     label: {
-                        text: `[${dateNumber}]`,
+                        text: `${dateNumber}`,
                         color: 'black',
                         fontSize: '12px',
                         fontWeight: 'bold'

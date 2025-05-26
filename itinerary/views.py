@@ -254,3 +254,20 @@ def update_card_order(request, itinerary_id):
             'success': False,
             'message': f'Error updating card order: {str(e)}'
         })
+    
+
+@login_required
+def save_itinerary(request, itinerary_id):
+    itinerary = get_object_or_404(Itineraries, id=itinerary_id, user=request.user)
+    start = itinerary.start_date
+    duration = itinerary.duration
+    date_list = [start + timedelta(days=i) for i in range(duration)]
+    
+    # Load existing place cards
+    place_cards = PlaceCards.objects.filter(itinerary=itinerary).order_by('date', 'order', 'start_time')
+    
+    return render(request, 'itinerary/edit_itinerary.html', {
+        "itinerary": itinerary,
+        "date_list": date_list,
+        "place_cards": place_cards,
+    })

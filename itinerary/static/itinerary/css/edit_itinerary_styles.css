@@ -40,6 +40,26 @@ a:active {
     text-decoration: none;
 }
 
+.user-acc-button {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 2px solid #006b71; /* Teal border */
+  border-radius: 25px;
+  color: #006B71;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+  margin-left: 10px;
+  /* margin-right: 10px; */
+}
+
+.user-acc-button:hover {
+  background-color: #006B71;
+  color: white;
+}
+
+
 /* trip details */
 .trip_details {
     padding: 15px 30px;
@@ -678,6 +698,6 @@ a:active {
 
 /* Style the time display in place cards */
 .place_card .time-span {
-    color: #39bdc4;
+    color: #205355;
     font-weight: 500;
 }
