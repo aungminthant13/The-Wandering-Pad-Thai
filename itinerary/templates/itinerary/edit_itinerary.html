@@ -19,6 +19,7 @@
      <div class="trip_details">
         <div class="trip_title">
             {{ itinerary.title }}
+            <span id="saveStatus" class="save-status">All changes saved!</span>
          </div>
          <div class="trip_dates">
             <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
@@ -30,24 +31,59 @@
 <section>
     <div class="itinerary_board">
         {% for date in date_list %}
-        <div class="itinerary_column" data-date="{{ date }}">
+        <div class="itinerary_column" data-date="{{ date|date:'Y-m-d' }}">
             <div class="itinerary_column_dateNo">{{ forloop.counter }}</div>
             <div class="itinerary_column_date">{{ date|date:"D, F j, Y" }}</div>
     
             <button class="itinerary_column_add_placeCard">Add A Place</button>
     
             <!-- This is where new cards will be injected -->
-            <div class="place_cards_container"></div>
+            <div class="place_cards_container">
+                {% for card in place_cards %}
+                    {% if card.date|date:'Y-m-d' == date|date:'Y-m-d' %}
+                    <div class="place_card" 
+                         draggable="true" 
+                         data-card-id="{{ card.id }}"
+                         data-place-id="{{ card.google_place_id }}"
+                         data-place-lat="{{ card.latitude }}"
+                         data-place-lng="{{ card.longitude }}"
+                         data-place-address="{{ card.address }}"
+                         data-original-place-name="{{ card.google_place_name }}"
+                         data-start-time="{% if card.start_time %}{{ card.start_time|time:'H:i' }}{% endif %}"
+                         data-end-time="{% if card.end_time %}{{ card.end_time|time:'H:i' }}{% endif %}">
+                        
+                        <div class="drag-handle">⋮⋮</div>
+                        <strong>{{ card.title }}</strong><br>
+                        
+                        {% if card.start_time or card.end_time %}
+                            <span class="time-span">
+                                {% if card.start_time and card.end_time %}
+                                    {{ card.start_time|time:"H:i" }} - {{ card.end_time|time:"H:i" }}
+                                {% elif card.start_time %}
+                                    {{ card.start_time|time:"H:i" }}
+                                {% elif card.end_time %}
+                                    Until {{ card.end_time|time:"H:i" }}
+                                {% endif %}
+                            </span><br>
+                        {% endif %}
+                        
+                        {% if card.notes %}
+                            <p>{{ card.notes }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- MOVED MODAL OUTSIDE THE BOARD -->
+    <!-- MODAL -->
     <div id="placeCardFormModal" class="placeCardFormModal hidden">
         <form id="placeCardForm">
             <h3 style="margin-bottom: 20px; text-align: center;">Add New Place</h3>
             
-            <!-- NEW: Place search input with autocomplete -->
+            <!-- Place search input with autocomplete -->
             <div class="place-search-container">
                 <input type="text" id="placeSearchInput" placeholder="Search for a place..." autocomplete="off">
                 <div id="placeSearchResults" class="place-search-results hidden"></div>
@@ -67,11 +103,12 @@
             <textarea name="notes" placeholder="Notes" rows="3"></textarea>
     
             <input type="hidden" name="date" id="placeFormDate">
-            <!-- NEW: Hidden fields to store place data -->
+            <!-- Hidden fields to store place data -->
             <input type="hidden" name="place_id" id="placeId">
             <input type="hidden" name="place_lat" id="placeLat">
             <input type="hidden" name="place_lng" id="placeLng">
             <input type="hidden" name="place_address" id="placeAddress">
+            <input type="hidden" name="card_id" id="cardId">
     
             <div style="text-align: center;">
                 <button type="button" id="cancelFormBtn">Cancel</button>
@@ -84,6 +121,9 @@
 
 <!-- Load Google Maps JavaScript API -->
 <script>
+    // Global variables
+    const ITINERARY_ID = {{ itinerary.id }};
+    
     // Load Google Maps API with Places library
     function loadGoogleMapsAPI() {
         const script = document.createElement('script');
@@ -104,15 +144,139 @@
 </script>
 
 <script>
-    // CLEANED UP JAVASCRIPT - NO DUPLICATES
+    // SAVE STATUS MANAGEMENT
+    const saveStatus = document.getElementById('saveStatus');
+    let saveTimeout;
+
+    function showSaveStatus(status, message) {
+        clearTimeout(saveTimeout);
+        
+        saveStatus.className = `save-status ${status}`;
+        saveStatus.textContent = message;
+        
+        if (status === 'saving') {
+            // Don't auto-hide saving status
+            return;
+        }
+        
+        if (status === 'saved') {
+            saveTimeout = setTimeout(() => {
+                saveStatus.className = 'save-status';
+                saveStatus.textContent = 'All changes saved!';
+            }, 2000);
+        } else if (status === 'error') {
+            saveTimeout = setTimeout(() => {
+                saveStatus.className = 'save-status';
+                saveStatus.textContent = 'All changes saved!';
+            }, 5000);
+        }
+    }
+
+    // AUTO-SAVE FUNCTIONS
+    async function autoSaveCard(cardData) {
+        showSaveStatus('saving', 'Saving...');
+        
+        try {
+            console.log('Saving card data:', cardData); // Debug log
+            
+            const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/save/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify(cardData)
+            });
+            
+            const result = await response.json();
+            console.log('Save response:', result); // Debug log
+            
+            if (result.success) {
+                showSaveStatus('saved', 'Saved!');
+                return result.card_id;
+            } else {
+                showSaveStatus('error', 'Save failed');
+                console.error('Save error:', result.message);
+                alert('Save failed: ' + result.message); // Show user the error
+                return null;
+            }
+        } catch (error) {
+            showSaveStatus('error', 'Save failed');
+            console.error('Network error:', error);
+            alert('Network error: ' + error.message); // Show user the error
+            return null;
+        }
+    }
+
+    async function autoDeleteCard(cardId) {
+        showSaveStatus('saving', 'Deleting...');
+        
+        try {
+            const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/${cardId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showSaveStatus('saved', 'Deleted!');
+                return true;
+            } else {
+                showSaveStatus('error', 'Delete failed');
+                console.error('Delete error:', result.message);
+                return false;
+            }
+        } catch (error) {
+            showSaveStatus('error', 'Delete failed');
+            console.error('Network error:', error);
+            return false;
+        }
+    }
+
+    async function autoSaveCardOrder(cardOrders) {
+        try {
+            const response = await fetch(`/itinerary/${ITINERARY_ID}/place-cards/update-order/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({ card_orders: cardOrders })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showSaveStatus('saved', 'Order saved!');
+                return true;
+            } else {
+                console.error('Order save error:', result.message);
+                return false;
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            return false;
+        }
+    }
+
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+               document.querySelector('meta[name="csrf-token"]')?.content || '';
+    }
+
+    // EXISTING JAVASCRIPT WITH AUTO-SAVE INTEGRATION
     const modal = document.getElementById('placeCardFormModal');
     const form = document.getElementById('placeCardForm');
     const cancelBtn = document.getElementById('cancelFormBtn');
     const deleteBtn = document.getElementById('deleteFormBtn');
     const placeFormDate = document.getElementById('placeFormDate');
-    let editingCard = null; // Track if we're editing an existing card
+    const cardIdInput = document.getElementById('cardId');
+    let editingCard = null;
 
-    // NEW: Place search elements
+    // Place search elements
     const placeSearchInput = document.getElementById('placeSearchInput');
     const placeSearchResults = document.getElementById('placeSearchResults');
     const placeNameInput = form.title;
@@ -121,7 +285,7 @@
     const placeLngInput = document.getElementById('placeLng');
     const placeAddressInput = document.getElementById('placeAddress');
 
-    // NEW: Place search functionality
+    // Place search functionality
     let searchTimeout;
     placeSearchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
@@ -134,7 +298,7 @@
 
         searchTimeout = setTimeout(() => {
             searchPlaces(query);
-        }, 300); // Debounce for 300ms
+        }, 300);
     });
 
     function searchPlaces(query) {
@@ -145,10 +309,9 @@
 
         const request = {
             input: query,
-            // Limit search to Bangkok area
-            location: new google.maps.LatLng(13.7563, 100.5018), // Bangkok center
-            radius: 30000, // 30km radius to cover Greater Bangkok
-            componentRestrictions: { country: 'th' } // Restrict to Thailand
+            location: new google.maps.LatLng(13.7563, 100.5018),
+            radius: 30000,
+            componentRestrictions: { country: 'th' }
         };
 
         window.autocompleteService.getPlacePredictions(request, (predictions, status) => {
@@ -181,7 +344,6 @@
     }
 
     function selectPlace(prediction) {
-        // Get place details
         const request = {
             placeId: prediction.place_id,
             fields: ['name', 'formatted_address', 'geometry', 'place_id']
@@ -189,40 +351,31 @@
 
         window.placesService.getDetails(request, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                // Fill in the form fields
-                placeNameInput.value = place.name; // This can be edited by user
+                placeNameInput.value = place.name;
                 placeIdInput.value = place.place_id;
                 placeLatInput.value = place.geometry.location.lat();
                 placeLngInput.value = place.geometry.location.lng();
                 placeAddressInput.value = place.formatted_address;
-
-                // Keep the place name in search input
                 placeSearchInput.value = place.name;
                 placeSearchResults.classList.add('hidden');
                 
-                // Show feedback banner
                 showFeedbackBanner('✓ Place selected: ' + place.name);
             }
         });
     }
 
-    // Function to show temporary feedback banner
     function showFeedbackBanner(message) {
-        // Remove any existing banner
         const existingBanner = document.querySelector('.feedback-banner');
         if (existingBanner) {
             existingBanner.remove();
         }
 
-        // Create new banner
         const banner = document.createElement('div');
         banner.className = 'feedback-banner';
         banner.textContent = message;
         
-        // Add to modal
         form.insertBefore(banner, form.firstChild);
 
-        // Remove after 3 seconds with fade out
         setTimeout(() => {
             banner.style.opacity = '0';
             setTimeout(() => {
@@ -238,129 +391,163 @@
         }
     });
 
-    // Show modal when "Add A Place" buttons are clicked
+    // Show modal for adding new place
     document.querySelectorAll('.itinerary_column_add_placeCard').forEach(btn => {
         btn.addEventListener('click', function() {
             const column = btn.closest('.itinerary_column');
             const date = column.dataset.date;
 
-            // Reset editing state
             editingCard = null;
             form.reset();
-            placeSearchInput.value = ''; // Clear search input
-            placeSearchResults.classList.add('hidden'); // Hide search results
+            placeSearchInput.value = '';
+            placeSearchResults.classList.add('hidden');
+            cardIdInput.value = '';
 
-            // Set the hidden input value
             placeFormDate.value = date;
 
-            // Update modal title and buttons for ADD mode
             document.querySelector('#placeCardForm h3').textContent = 'Add New Place';
             document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Save Place';
-            deleteBtn.style.display = 'none'; // Hide delete button for new places
+            deleteBtn.style.display = 'none';
 
-            // Show the modal
             modal.classList.remove('hidden');
         });
     });
 
-    // Handle form submission (both create and edit)
-    form.addEventListener('submit', function(e) {
+    // Handle form submission with auto-save
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const placeName = this.title.value;
-        const time = this.time.value;
-        const endTime = this.end_time.value;
-        const notes = this.notes.value;
-        const date = this.date.value;
-        const placeId = this.place_id.value;
-        const placeLat = this.place_lat.value;
-        const placeLng = this.place_lng.value;
-        const placeAddress = this.place_address.value;
+        // Calculate order for new cards
+        let order = 0;
+        if (!editingCard) {
+            // For new cards, find the highest order in the target column
+            const targetColumn = document.querySelector(`.itinerary_column[data-date="${this.date.value}"]`);
+            const existingCards = targetColumn.querySelectorAll('.place_card');
+            order = existingCards.length; // This will put it at the end
+        } else {
+            // For existing cards, get current position
+            const currentColumn = editingCard.closest('.itinerary_column');
+            const cards = [...currentColumn.querySelectorAll('.place_card')];
+            order = cards.indexOf(editingCard);
+        }
+
+        const cardData = {
+            card_id: cardIdInput.value || null,
+            title: this.title.value || '',
+            start_time: this.time.value || '',
+            end_time: this.end_time.value || '',
+            notes: this.notes.value || '',
+            date: this.date.value,
+            place_id: this.place_id.value || '',
+            place_lat: this.place_lat.value || '',
+            place_lng: this.place_lng.value || '',
+            place_address: this.place_address.value || '',
+            original_place_name: placeSearchInput.value || this.title.value || '',
+            order: order
+        };
+
+        console.log('Form submission - card data:', cardData); // Debug log
+        console.log('Form values check:');
+        console.log('- title:', this.title.value);
+        console.log('- time:', this.time.value);
+        console.log('- end_time:', this.end_time.value);
+        console.log('- notes:', this.notes.value);
+        console.log('- place_id:', this.place_id.value);
+        console.log('- place_lat:', this.place_lat.value);
+        console.log('- place_lng:', this.place_lng.value);
+        console.log('- place_address:', this.place_address.value);
+        console.log('- placeSearchInput:', placeSearchInput.value);
+
+        const savedCardId = await autoSaveCard(cardData);
+        
+        if (!savedCardId) {
+            // Save failed, don't update UI
+            console.error('Save failed, not updating UI');
+            return;
+        }
+
+        console.log('Save successful, updating UI with card ID:', savedCardId); // Debug log
 
         // Format time display
         let timeDisplay = '';
-        if (time && endTime) {
-            timeDisplay = `${time} - ${endTime}`;
-        } else if (time) {
-            timeDisplay = `${time}`;
-        } else if (endTime) {
-            timeDisplay = `Until ${endTime}`;
+        if (cardData.start_time && cardData.end_time) {
+            timeDisplay = `${cardData.start_time} - ${cardData.end_time}`;
+        } else if (cardData.start_time) {
+            timeDisplay = `${cardData.start_time}`;
+        } else if (cardData.end_time) {
+            timeDisplay = `Until ${cardData.end_time}`;
         }
 
         if (editingCard) {
             // UPDATE EXISTING CARD
             let cardHTML = `
                 <div class="drag-handle">⋮⋮</div>
-                <strong>${placeName}</strong><br>`;
+                <strong>${cardData.title}</strong><br>`;
             
-            // Only add time if it exists
             if (timeDisplay) {
                 cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
             }
             
-            // Only add notes if they exist
-            if (notes) {
-                cardHTML += `<p>${notes}</p>`;
+            if (cardData.notes) {
+                cardHTML += `<p>${cardData.notes}</p>`;
             }
             
             editingCard.innerHTML = cardHTML;
 
             // Update data attributes
-            editingCard.dataset.placeId = placeId;
-            editingCard.dataset.placeLat = placeLat;
-            editingCard.dataset.placeLng = placeLng;
-            editingCard.dataset.placeAddress = placeAddress;
-            editingCard.dataset.originalPlaceName = placeSearchInput.value || placeName;
-            editingCard.dataset.startTime = time;
-            editingCard.dataset.endTime = endTime;
+            editingCard.dataset.cardId = savedCardId;
+            editingCard.dataset.placeId = cardData.place_id || '';
+            editingCard.dataset.placeLat = cardData.place_lat || '';
+            editingCard.dataset.placeLng = cardData.place_lng || '';
+            editingCard.dataset.placeAddress = cardData.place_address || '';
+            editingCard.dataset.originalPlaceName = cardData.original_place_name || '';
+            editingCard.dataset.startTime = cardData.start_time || '';
+            editingCard.dataset.endTime = cardData.end_time || '';
 
-            // If date changed, move card to new column
+            // Move card if date changed
             const currentColumn = editingCard.closest('.itinerary_column');
             const currentDate = currentColumn.dataset.date;
             
-            if (currentDate !== date) {
-                const newColumn = document.querySelector(`.itinerary_column[data-date="${date}"]`);
+            if (currentDate !== cardData.date) {
+                const newColumn = document.querySelector(`.itinerary_column[data-date="${cardData.date}"]`);
                 const newContainer = newColumn.querySelector('.place_cards_container');
                 newContainer.appendChild(editingCard);
             }
 
-            // Reset editing state
             editingCard = null;
         } else {
             // CREATE NEW CARD
-            const column = document.querySelector(`.itinerary_column[data-date="${date}"]`);
+            const column = document.querySelector(`.itinerary_column[data-date="${cardData.date}"]`);
             const container = column.querySelector('.place_cards_container');
 
             const card = document.createElement('div');
             card.classList.add('place_card');
             card.draggable = true;
             
-            // Store place data as data attributes
-            card.dataset.placeId = placeId;
-            card.dataset.placeLat = placeLat;
-            card.dataset.placeLng = placeLng;
-            card.dataset.placeAddress = placeAddress;
-            card.dataset.originalPlaceName = placeSearchInput.value || placeName;
-            card.dataset.startTime = time;
-            card.dataset.endTime = endTime;
+            // Store data attributes
+            card.dataset.cardId = savedCardId;
+            card.dataset.placeId = cardData.place_id || '';
+            card.dataset.placeLat = cardData.place_lat || '';
+            card.dataset.placeLng = cardData.place_lng || '';
+            card.dataset.placeAddress = cardData.place_address || '';
+            card.dataset.originalPlaceName = cardData.original_place_name || '';
+            card.dataset.startTime = cardData.start_time || '';
+            card.dataset.endTime = cardData.end_time || '';
             
             let cardHTML = `
                 <div class="drag-handle">⋮⋮</div>
-                <strong>${placeName}</strong><br>`;
+                <strong>${cardData.title}</strong><br>`;
             
-            // Only add time if it exists
             if (timeDisplay) {
                 cardHTML += `<span class="time-span">${timeDisplay}</span><br>`;
             }
             
-            // Only add notes if they exist
-            if (notes) {
-                cardHTML += `<p>${notes}</p>`;
+            if (cardData.notes) {
+                cardHTML += `<p>${cardData.notes}</p>`;
             }
             
             card.innerHTML = cardHTML;
 
-            // Add drag and edit listeners to the new card
             addDragListeners(card);
             addEditListener(card);
 
@@ -369,25 +556,34 @@
 
         // Reset and hide form
         this.reset();
-        placeSearchInput.value = ''; // Clear search input
+        placeSearchInput.value = '';
         modal.classList.add('hidden');
     });
 
     // Cancel button
     cancelBtn.addEventListener('click', function() {
         form.reset();
-        placeSearchInput.value = ''; // Clear search input
-        placeSearchResults.classList.add('hidden'); // Hide search results
-        editingCard = null; // Reset editing state
+        placeSearchInput.value = '';
+        placeSearchResults.classList.add('hidden');
+        editingCard = null;
         modal.classList.add('hidden');
     });
 
-    // Delete button
-    deleteBtn.addEventListener('click', function() {
+    // Delete button with auto-save
+    deleteBtn.addEventListener('click', async function() {
         if (editingCard && confirm('Are you sure you want to delete this place?')) {
-            editingCard.remove(); // Remove the card from DOM
+            const cardId = editingCard.dataset.cardId;
+            
+            if (cardId) {
+                const success = await autoDeleteCard(cardId);
+                if (!success) {
+                    return; // Don't remove from UI if delete failed
+                }
+            }
+            
+            editingCard.remove();
             form.reset();
-            placeSearchInput.value = ''; // Clear search input
+            placeSearchInput.value = '';
             editingCard = null;
             modal.classList.add('hidden');
         }
@@ -397,17 +593,16 @@
     modal.addEventListener('click', function(event) {
         if (!form.contains(event.target)) {
             form.reset();
-            placeSearchInput.value = ''; // Clear search input
-            placeSearchResults.classList.add('hidden'); // Hide search results
-            editingCard = null; // Reset editing state
+            placeSearchInput.value = '';
+            placeSearchResults.classList.add('hidden');
+            editingCard = null;
             modal.classList.add('hidden');
         }
     });
 
-    // DRAG AND DROP FUNCTIONALITY
+    // DRAG AND DROP FUNCTIONALITY WITH AUTO-SAVE
     let draggedElement = null;
 
-    // Function to add drag listeners to place cards
     function addDragListeners(card) {
         card.addEventListener('dragstart', function(e) {
             draggedElement = this;
@@ -421,19 +616,13 @@
         });
     }
 
-    // Function to add edit listener to place cards
     function addEditListener(card) {
         card.addEventListener('click', function(e) {
-            // Prevent editing when dragging
             if (this.classList.contains('dragging')) return;
-            
-            // Don't trigger on drag handle clicks
             if (e.target.classList.contains('drag-handle')) return;
 
-            // Set editing state
             editingCard = this;
 
-            // Get current card data
             const strong = this.querySelector('strong').textContent;
             const timeSpan = this.querySelector('.time-span');
             const p = this.querySelector('p');
@@ -442,56 +631,42 @@
 
             // Pre-fill form
             form.title.value = strong;
-            
-            // Extract start and end times from the data attributes
-            if (this.dataset.startTime) {
-                form.time.value = this.dataset.startTime;
-            } else {
-                form.time.value = '';
-            }
-            
-            if (this.dataset.endTime) {
-                form.end_time.value = this.dataset.endTime;
-            } else {
-                form.end_time.value = '';
-            }
-            
+            form.time.value = this.dataset.startTime || '';
+            form.end_time.value = this.dataset.endTime || '';
             form.notes.value = p ? p.textContent : '';
             placeFormDate.value = currentDate;
+            cardIdInput.value = this.dataset.cardId || '';
 
-            // Pre-fill place data if available
+            // Pre-fill place data
             placeIdInput.value = this.dataset.placeId || '';
             placeLatInput.value = this.dataset.placeLat || '';
             placeLngInput.value = this.dataset.placeLng || '';
             placeAddressInput.value = this.dataset.placeAddress || '';
             
-            // If this place has Google data, show the original place name in search field
             if (this.dataset.placeId && this.dataset.originalPlaceName) {
                 placeSearchInput.value = this.dataset.originalPlaceName;
             } else if (this.dataset.placeId) {
-                // Fallback to current title if original name not stored
                 placeSearchInput.value = strong;
             } else {
                 placeSearchInput.value = '';
             }
 
-            // Update modal title and buttons for EDIT mode
+            // Update modal for edit mode
             document.querySelector('#placeCardForm h3').textContent = 'Edit Place';
             document.querySelector('#placeCardForm button[type="submit"]').textContent = 'Update Place';
-            deleteBtn.style.display = 'inline-block'; // Show delete button for existing places
+            deleteBtn.style.display = 'inline-block';
 
-            // Show the modal
             modal.classList.remove('hidden');
         });
     }
 
-    // Add drag and edit listeners to all existing place cards (if any)
+    // Add listeners to existing cards
     document.querySelectorAll('.place_card').forEach(card => {
         addDragListeners(card);
         addEditListener(card);
     });
 
-    // Make place card containers drop zones
+    // Make containers drop zones with auto-save
     document.querySelectorAll('.place_cards_container').forEach(container => {
         container.addEventListener('dragover', function(e) {
             e.preventDefault();
@@ -507,16 +682,43 @@
             }
         });
 
-        container.addEventListener('drop', function(e) {
+        container.addEventListener('drop', async function(e) {
             e.preventDefault();
-            // The card is already moved in dragover, just clean up
+            
             if (draggedElement) {
                 draggedElement.classList.remove('dragging');
+                
+                // Auto-save the new order
+                await saveCardOrderAfterDrop();
             }
         });
     });
 
-    // Function to determine where to insert the dragged element
+    // Save card order after drag and drop
+    async function saveCardOrderAfterDrop() {
+        const cardOrders = [];
+        
+        document.querySelectorAll('.itinerary_column').forEach(column => {
+            const date = column.dataset.date;
+            const cards = column.querySelectorAll('.place_card');
+            
+            cards.forEach((card, index) => {
+                const cardId = card.dataset.cardId;
+                if (cardId) {
+                    cardOrders.push({
+                        card_id: parseInt(cardId),
+                        date: date,
+                        order: index
+                    });
+                }
+            });
+        });
+        
+        if (cardOrders.length > 0) {
+            await autoSaveCardOrder(cardOrders);
+        }
+    }
+
     function getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('.place_card:not(.dragging)')];
         
@@ -530,6 +732,15 @@
                 return closest;
             }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Add CSRF token to page (add this to your base template)
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        document.body.appendChild(csrfInput);
     }
 </script>
 

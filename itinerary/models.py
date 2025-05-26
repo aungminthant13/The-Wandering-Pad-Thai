@@ -1,17 +1,3 @@
-# from django.conf import settings
-# from django.db import models
-
-# class Itineraries(models.Model):
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-#     title = models.CharField(max_length=200)
-#     start_date = models.DateField(null=True, blank=True)
-#     return_date = models.DateField(null=True, blank=True)
-#     duration = models.IntegerField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return self.title
-
 from django.conf import settings
 from django.db import models
 
@@ -36,7 +22,7 @@ class Itineraries(models.Model):
         indexes = [
             models.Index(fields=['user', '-start_date']),
         ]
-        verbose_name_plural = "Itineraries"  # Keep the plural form in admin
+        verbose_name_plural = "Itineraries"
     
     def __str__(self):
         return f"{self.title} ({self.start_date} to {self.return_date})"
@@ -54,7 +40,7 @@ class PlaceCards(models.Model):
     itinerary = models.ForeignKey(Itineraries, on_delete=models.CASCADE, related_name='place_cards')
     
     # Core fields
-    title = models.CharField(max_length=200)  # Changed from place_name to title
+    title = models.CharField(max_length=200)
     date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
@@ -80,9 +66,23 @@ class PlaceCards(models.Model):
             models.Index(fields=['itinerary', 'date', 'order']),
             models.Index(fields=['google_place_id']),
         ]
-        unique_together = [['itinerary', 'date', 'order']]
+        # REMOVED unique_together constraint to avoid conflicts
+        # unique_together = [['itinerary', 'date', 'order']]
         verbose_name_plural = "Place Cards"
     
     def __str__(self):
         time_str = f" at {self.start_time}" if self.start_time else ""
         return f"{self.title}{time_str} on {self.date}"
+
+    def save(self, *args, **kwargs):
+        # Auto-adjust order if there's a conflict
+        if not self.pk:  # New object
+            max_order = PlaceCards.objects.filter(
+                itinerary=self.itinerary,
+                date=self.date
+            ).aggregate(models.Max('order'))['order__max']
+            
+            if max_order is not None and self.order <= max_order:
+                self.order = max_order + 1
+        
+        super().save(*args, **kwargs)
