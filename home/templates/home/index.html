@@ -26,7 +26,7 @@
           <input
             type="text"
             id="tripTitle"
-            placeholder="e.g. BKK for Songkran"
+            placeholder="e.g. BKK for 10 days"
           />
         </div>
       </div>
@@ -119,9 +119,8 @@
         let tripDurationText =
           document.getElementById("tripDurationValue").textContent;
 
-        // Default title if empty
         if (!tripTitle) {
-          tripTitle = "My Bangkok Trip";
+          tripTitle = "Untitled";
         }
 
         // Validation
@@ -146,7 +145,6 @@
             trip_title: tripTitle,
             start_date: startDate,
             return_date: returnDate,
-            // Don't send trip_duration - it's calculated automatically
           }),
         })
           .then((response) => response.json())

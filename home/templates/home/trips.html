@@ -2,12 +2,256 @@
 
 {% block content %}
 
+<style>
+  /* Navigation Bar Styles */
+  /* .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .logo-text {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+  }
+
+  .logo a {
+    text-decoration: none;
+  }
+
+  .logo:hover .logo-text {
+    transform: translateY(-2px);
+  }
+
+  .user-acc-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .user-acc-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  } */
+
+  /* Main Content Section */
+  .trip-history-section {
+    min-height: calc(100vh - 100px);
+    background: #f7fafc;
+    padding: 3rem 2rem;
+  }
+
+  .trip-history-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    color: #226656;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .section-subtitle {
+    color: #18463b;
+    font-size: 1.1rem;
+  }
+
+  /* Itinerary Cards Grid */
+  .itinerary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .itinerary-card {
+    background: rgb(255, 255, 255);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .itinerary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-header {
+    background: #006B71;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .itinerary-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s ease;
+  }
+
+  .itinerary-title:hover {
+    transform: translateX(5px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .info-row:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: #718096;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .info-value {
+    color: #0d0f13;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .date-range {
+    background: #f7fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+
+  .date-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-text {
+    color: #718096;
+    margin-bottom: 2rem;
+  }
+
+  .create-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+  }
+
+  .create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  /* Days Badge */
+  .days-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+  }
+
+
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 1rem 1.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+    }
+
+    .trip-history-section {
+      padding: 2rem 1rem;
+    }
+
+    .itinerary-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+  }
+</style>
 
 <nav class="navbar">
   <div class="logo">
-    <a href="{% url 'home' %}"
-      ><span class="logo-text">The Wandering Pad Thai</span></a
-    >
+    <a href="{% url 'home' %}">
+      <span class="logo-text">The Wandering Pad Thai</span>
+    </a>
   </div>
 
   <div class="user-acc">
@@ -15,41 +259,60 @@
   </div>
 </nav>
 
+<section class="trip-history-section">
+  <div class="trip-history-content">
+    <div class="section-header">
+      <h1 class="section-title">Your Travel Itineraries</h1>
+      <p class="section-subtitle">Click on any itinerary to view and edit details</p>
+    </div>
 
-    <!-- {% if itineraries %}
-    <table>
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Days</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for itinerary in itineraries %}
-        <tr>
-          <td>{{ itinerary.title }}</td>
-          <td>{{ itinerary.days }}</td>
-          <td>{{ itinerary.start_date|default:"Not set" }}</td>
-          <td>{{ itinerary.return_date|default:"Not set" }}</td>
-          <td>{{ itinerary.created_at|date:"Y-m-d H:i" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% if itineraries %}
+    <div class="itinerary-grid">
+      {% for itinerary in itineraries %}
+      <div class="itinerary-card">
+        <div class="card-header">
+          <a href="{% url 'itinerary:edit_itinerary' itinerary.id %}" class="itinerary-title">
+            {{ itinerary.title }}
+          </a>
+          <span class="days-badge">{{ itinerary.duration }} days</span>
+        </div>
+        
+        <div class="card-body">
+          <div class="date-range">
+            <div class="info-row">
+              <span class="info-label">
+                <svg class="date-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Travel Dates
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Start</span>
+              <span class="info-value">{{ itinerary.start_date|date:"M d, Y"|default:"Not set" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Return</span>
+              <span class="info-value">{{ itinerary.return_date|date:"M d, Y"|default:"Not set" }}</span>
+            </div>
+          </div>
+          
+          <div class="info-row" style="margin-top: 1rem;">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ itinerary.created_at|date:"M d, Y" }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
     {% else %}
-    <p>
-      You have no itineraries yet.
-    </p>
-    {% endif %} -->
-
-
-<section class="trip-form-section">
-  <div class="trip-form-section-content">
-
-
+    <div class="empty-state">
+      <div class="empty-icon">✈️</div>
+      <h2 class="empty-title">No itineraries yet</h2>
+      <p class="empty-text">Start planning your next adventure by creating your first itinerary!</p>
+      <a href="{% url 'home' %}" class="create-btn">Create New Itinerary</a>
+    </div>
+    {% endif %}
   </div>
 </section>
 
