@@ -6,6 +6,7 @@ app_name = 'itinerary'
 
 urlpatterns = [
     path('create_itinerary/', create_itinerary, name='create_itinerary'),
+    # path('', views.home, name='home'),;
     path('edit_itinerary/<int:itinerary_id>/', edit_itinerary, name='edit_itinerary'),
     path('save_itinerary/<int:itinerary_id>/', save_itinerary, name='save_itinerary'),
 

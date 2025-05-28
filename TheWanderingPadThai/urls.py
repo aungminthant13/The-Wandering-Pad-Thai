@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('home.urls')),
     path("auth/", include("user_auth.urls")),
     path("itinerary/", include("itinerary.urls", namespace='itinerary')),
+    path('itinerary/', include('itinerary.urls')),
 ]

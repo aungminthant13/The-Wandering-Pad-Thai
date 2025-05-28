@@ -266,7 +266,7 @@ def save_itinerary(request, itinerary_id):
     # Load existing place cards
     place_cards = PlaceCards.objects.filter(itinerary=itinerary).order_by('date', 'order', 'start_time')
     
-    return render(request, 'itinerary/edit_itinerary.html', {
+    return render(request, 'itinerary/save_itinerary.html', {
         "itinerary": itinerary,
         "date_list": date_list,
         "place_cards": place_cards,

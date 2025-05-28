@@ -12,5 +12,5 @@ def home(request):
 
 
 def trips(request):
-    user_itineraries = Itineraries.objects.filter(user=request.user)
+    user_itineraries = Itineraries.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'home/trips.html', {'itineraries': user_itineraries})

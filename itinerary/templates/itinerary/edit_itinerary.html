@@ -24,7 +24,7 @@
         <div class="trip_title">
             {{ itinerary.title }}
             <span id="saveStatus" class="save-status">All changes saved!</span>
-         </div> <br>
+         </div>
          <div class="trip_dates">
             <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
          </div>
@@ -146,7 +146,7 @@
 <!-- Load Google Maps JavaScript API -->
 <script>
     // Global variables
-    const ITINERARY_ID = {{ itinerary.id }};
+    const ITINERARY_ID = "{{ itinerary.id }}";
     let map = null;
     let markers = [];
     let infoWindows = [];
@@ -250,7 +250,7 @@
                     label: {
                         text: `${dateNumber}`,
                         color: 'black',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: 'bold'
                     },
                     icon: {
@@ -267,7 +267,7 @@
                 // Create info window content
                 let infoContent = `
                     <div class="map-info-window">
-
+                        <h3>${placeName}</h2>
                         <h4>Day ${dateNumber}: ${title}</h4>
                 `;
 
@@ -323,7 +323,7 @@
             '#45B7D1', 
             '#98D8C8',
             '#FFA07A',
-            '#DDA0DD',
+            '#d35ce0',
             '#96CEB4',
             '#F7DC6F',
         ];
