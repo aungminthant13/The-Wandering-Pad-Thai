@@ -3,7 +3,10 @@
 
 {% block content %}
 
-{% block css %} <link rel="stylesheet" href="/static/itinerary/css/edit_itinerary_styles.css" /> {% endblock %}
+{% block css %} 
+<link rel="stylesheet" href="/static/itinerary/css/edit_itinerary_styles.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+{% endblock %}
 
 <!-- navbar -->
 <nav class="navbar">
@@ -14,33 +17,35 @@
     </div>
     
     <div class="user-acc">
-        <a href="{% url 'home' %}" class="user-acc-button">Next</a>
+        <a href="{% url 'home' %}" class="user-acc-button">Next →</a>
     </div>
 </nav>
 
 <section>
     <!-- trip details -->
      <div class="trip_details">
-        <div class="trip_title">
-            {{ itinerary.title }}
-            <span id="saveStatus" class="save-status">All changes saved!</span>
-         </div>
-         <div class="trip_dates">
-            <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
-         </div>
-     </div>
+        <div class="trip_info">
+            <div class="trip_title">
+                {{ itinerary.title }}
+                <span id="saveStatus" class="save-status">All changes saved!</span>
+             </div>
+             <div class="trip_dates">
+                <div>{{ itinerary.start_date|date:"D, F j, Y" }} · · · ➡️ · · · {{ itinerary.return_date|date:"D, F j, Y" }}</div>
+             </div>
+        </div>
 
-     <!-- View toggle switch -->
-    <div class="view-toggle-container">
-        <div class="view-toggle">
-        <input type="checkbox" id="viewToggle" class="toggle-checkbox">
-        <label for="viewToggle" class="toggle-label">
-            <span class="toggle-text-left">Board</span>
-            <span class="toggle-text-right">Map</span>
-            <span class="toggle-slider"></span>
-        </label>
+        <!-- View toggle switch -->
+        <div class="view-toggle-container">
+            <div class="view-toggle">
+            <input type="checkbox" id="viewToggle" class="toggle-checkbox">
+            <label for="viewToggle" class="toggle-label">
+                <span class="toggle-text-left">Board</span>
+                <span class="toggle-text-right">Map</span>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
     </div>
-</div>
+     </div>
 </section>
 
 
@@ -106,6 +111,7 @@
 <!-- MODAL -->
 <div id="placeCardFormModal" class="placeCardFormModal hidden">
     <form id="placeCardForm">
+        <button type="button" id="deleteFormBtn" style="background-color: #ffffff; color: white; display: none; margin-top: -5px; left: -3px;"><i class="fa fa-trash-o" style="font-size:20px;color:red"></i></button>
         <h3 style="margin-bottom: 20px; text-align: center;">Add New Place</h3>
         
         <!-- Place search input with autocomplete -->
@@ -136,8 +142,7 @@
         <input type="hidden" name="card_id" id="cardId">
 
         <div style="text-align: center;">
-            <button type="button" id="cancelFormBtn">Cancel</button>
-            <button type="button" id="deleteFormBtn" style="background-color: #dc3545; color: white; display: none;">Delete</button>
+            <button type="button" id="cancelFormBtn">✕</button>
             <button type="submit">Save Place</button>
         </div>
     </form>

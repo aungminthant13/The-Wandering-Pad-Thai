@@ -65,6 +65,13 @@ a:active {
     padding: 15px 30px;
     font-family: Arial, Helvetica, sans-serif;
     color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.trip_info {
+    flex: 1;
 }
 
 .trip_title {
@@ -135,8 +142,8 @@ a:active {
 .view-toggle-container {
     display: flex;
     justify-content: flex-end;
-    padding: 10px 30px;
-    margin-top: -10px;
+    align-items: flex-start;
+    flex-shrink: 0;
 }
 
 /* Toggle switch styles */
@@ -203,7 +210,7 @@ a:active {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
     overflow: hidden;
-    height: 600px;
+    height: 520px;
     max-width: 1600px;
     position: relative;
     padding: 10px;
@@ -260,15 +267,15 @@ a:active {
     border-radius: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
-    height: 500px;
+    height: 520px;
     max-width: 1600px;
 }
 
 .itinerary_column {
     position: relative;
     background-color: #ffffff;
-    min-width: 200px;
-    max-width: 200px;
+    min-width: 250px;
+    max-width: 250px;
     padding: 10px;
     box-sizing: border-box;
     border-right: 1px solid #d2d2d2;
@@ -407,6 +414,7 @@ a:active {
     width: 350px;
     max-width: 90vw;
     z-index: 10001;
+    position: relative;
 }
 
 #placeCardForm input,
@@ -445,6 +453,60 @@ a:active {
 #placeCardForm button[type="button"]:hover {
     background-color: #bbb;
 }
+
+/* Delete button - positioned at top left */
+#deleteFormBtn {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    background-color: #ffffff !important;
+    color: red !important;
+    border: 1px solid red !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+    width: 35px !important;
+    height: 35px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; */
+    margin: 0 !important;
+}
+
+#deleteFormBtn:hover {
+    background-color: rgba(220, 53, 70, 0.350) !important;
+}
+
+/* Cancel button - positioned at top right as X */
+#cancelFormBtn {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    background-color: #ffffff !important;
+    color: #666 !important;
+    border: 1px solid rgb(74, 74, 74) !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+    width: 35px !important;
+    height: 35px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; */
+    margin: 0 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+#cancelFormBtn:hover {
+    background-color: rgba(0,0,0,0.350) !important;
+    color: #000 !important;
+}
+
 
 /* Delete icon in modal */
 .delete-icon {
