@@ -1,20 +1,36 @@
 {% extends "home/base.html" %} {% block title %}Home{% endblock %} 
 
+
 {% block content %}
 
-<!-- navbar -->
 <nav class="navbar">
-  <div class="logo">
-    <a href="{% url 'home' %}"
-      ><span class="logo-text">The Wandering Pad Thai</span></a
-    >
+  <!-- Left: User name -->
+  <!-- <div class="navbar-left">
+    <a href="{% url 'home' %}" class="user-acc-button">{{ user.name }}</a>
+  </div> -->
+  <form method="POST" action="{% url 'logout' %}" class="logout-form">
+  {% csrf_token %}
+    <button type="submit" class="user-acc-button user-logout-button">
+      <span class="user-name">{{ user.name }}</span>
+      <span class="logout-text">Logout<i class="fa fa-sign-out" style="font-size:13px"></i></span>
+    </button>
+  </form>
+
+  <!-- Center: Logo -->
+  <div class="navbar-center">
+    <a href="{% url 'home' %}" class="logo">
+      <span class="logo-text">The Wandering Pad Thai</span>
+    </a>
   </div>
 
-  <div class="user-acc">
-    <a href="{% url 'trips' %}" class="user-acc-button">Itineraries</a>
-    <a href="{% url 'home' %}" class="user-acc-button">{{ user.name }}</a>
+  <!-- Right: Itineraries -->
+  <div class="navbar-right">
+    <a href="{% url 'trips' %}" class="itinerary-history">
+      <i class="fa fa-clock-o" style="font-size:15px"></i> Itineraries
+    </a>
   </div>
 </nav>
+
 
 <!-- trip form section -->
 <section class="trip-form-section">

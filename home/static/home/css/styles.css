@@ -9,7 +9,6 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Navbar container */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -17,45 +16,110 @@ body {
   padding: 15px 30px;
   background-color: white;
   border-bottom: 1px solid #f0f0f0;
+  position: relative;
 }
 
-/* Logo section */
+/* Center the logo absolutely */
+.navbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .logo {
   display: flex;
   align-items: center;
   font-size: 24px;
   font-weight: bold;
+  text-align: center;
+  text-decoration: none;
 }
-
 
 .logo-text {
   font-weight: bold;
 }
 
-.user-acc {
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-
 .user-acc-button {
   display: inline-block;
   padding: 10px 20px;
-  border: 2px solid #006b71; /* Teal border */
+  border: 2px solid #006b71;
   border-radius: 25px;
   color: #006B71;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.3s, color 0.3s;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin: 0 10px;
 }
 
 .user-acc-button:hover {
-  background-color: #006B71;
+  background-color: #b41b0a;
   color: white;
 }
+
+.itinerary-history{
+  display: inline-block;
+  padding: 10px 20px;
+  border: 2px solid #006b71;
+  border-radius: 25px;
+  color: #006B71;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+  margin: 0 10px;
+}
+
+.itinerary-history:hover {
+  background-color: #006b71;
+  color: white;
+}
+
+.user-logout-button {
+  position: relative;
+  background: none;
+  border: 2px solid #006b71;
+  border-radius: 25px;
+  color: #006b71;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 30px; /* wider padding */
+  min-width: 120px; /* ensure it's wide enough */
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.user-logout-button i {
+  margin-left: 5px; /* space between text and icon */
+}
+
+.user-name,
+.logout-text {
+  display: inline-block;
+  transition: opacity 0.3s ease;
+}
+
+.logout-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap; /* prevent wrapping */
+}
+
+.user-logout-button:hover .user-name {
+  opacity: 0;
+}
+
+.user-logout-button:hover .logout-text {
+  opacity: 1;
+}
+
+
 
 /* Make the navbar responsive */
 @media (max-width: 768px) {
