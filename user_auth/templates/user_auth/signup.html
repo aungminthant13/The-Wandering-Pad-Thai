@@ -1,23 +1,46 @@
 {% extends 'user_auth/base.html' %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-6">Sign Up</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <div class="space-y-4">
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Join us to start planning your trips</p>
+        </div>
+        
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
             {% for field in form %}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                        {% for error in field.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <span class="helptext">{{ field.help_text }}</span>
                     {% endif %}
                 </div>
             {% endfor %}
+            
+            <button type="submit" class="auth-submit-btn">Create Account</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p class="auth-footer-text">
+                Already have an account? 
+                <a href="{% url 'login' %}" class="auth-footer-link">Sign in here</a>
+            </p>
         </div>
-        <button type="submit" class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Sign Up</button>
-    </form>
-    <p class="mt-4 text-sm">Already have an account? <a href="{% url 'login' %}" class="text-blue-500">Log in</a></p>
+    </div>
 </div>
 {% endblock %}

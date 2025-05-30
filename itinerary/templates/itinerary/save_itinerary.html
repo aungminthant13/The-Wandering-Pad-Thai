@@ -1,0 +1,451 @@
+{% extends "itinerary/base.html" %}
+{% block title %}Save Itinerary{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/itinerary/css/save_itinerary_styles.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- navbar -->
+<nav class="navbar">
+    <div class="logo">
+        <a href="{% url 'home' %}">
+            <span class="logo-text">The Wandering Pad Thai</span>
+        </a>
+    </div>
+
+    <div class="progress-bar">
+        <div class="step">
+            <div class="circle">1</div>
+            <div class="label">Create</div>
+        </div>
+        <div class="line"></div>
+        <div class="step">
+            <div class="circle">2</div>
+            <div class="label">Add Places</div>
+        </div>
+        <div class="line active"></div>
+        <div class="step">
+            <div class="circle active">3</div>
+            <div class="label">Save</div>
+        </div>
+    </div>
+
+    
+    <div class="navbar-right user-acc-button">
+        <a href="{% url 'home' %}" class="itinerary-history">
+        <i class="fa fa-home" style="font-size:15px"></i> Home
+        </a>
+    </div>
+</nav>
+
+<!-- Trip Header -->
+<section class="trip-header">
+    <div class="trip-title">{{ itinerary.title }}</div>
+    <div class="trip-dates">
+        <i class="fa fa-calendar"></i> {{ itinerary.start_date|date:"F j, Y" }} — {{ itinerary.return_date|date:"F j, Y" }}
+    </div>
+    <div class="trip-location">
+        <i class="fa fa-map-marker"></i> {{ itinerary.destination_city }}, {{ itinerary.destination_country }}
+    </div>
+</section>
+
+<!-- Export Button -->
+<section class="export-section">
+    <button id="exportPdfBtn" class="export-btn">
+        <i class="fa fa-file-pdf-o"></i> Export as PDF
+    </button>
+    <a href="{% url 'itinerary:edit_itinerary' itinerary.id %}" class="export-btn" style="margin-left: 10px; color: white;">
+        <i class="fa fa-pencil"></i> Edit
+    </a>
+</section>
+
+<!-- Map Section -->
+<section class="map-section">
+    <h2 class="section-title">Trip Overview Map</h2>
+    <div class="map-container">
+        <div id="itineraryMap" class="itinerary-map"></div>
+    </div>
+</section>
+
+<!-- Detailed Itinerary -->
+<section class="itinerary-section">
+    <h2 class="section-title">Detailed Itinerary</h2>
+    
+    <div class="itinerary-content" id="itineraryContent">
+        {% for date in date_list %}
+        <div class="day-section">
+            <div class="day-header">
+                <span class="day-number">Day {{ forloop.counter }}</span>
+                <span class="day-date">{{ date|date:"l, F j, Y" }}</span>
+            </div>
+            
+            <div class="day-activities">
+                {% for card in place_cards %}
+                    {% if card.date|date:'Y-m-d' == date|date:'Y-m-d' %}
+                    <div class="activity-item">
+                        <div class="activity-time">
+                            {% if card.start_time and card.end_time %}
+                                {{ card.start_time|time:"g:i A" }} - {{ card.end_time|time:"g:i A" }}
+                            {% elif card.start_time %}
+                                {{ card.start_time|time:"g:i A" }}
+                            {% elif card.end_time %}
+                                Until {{ card.end_time|time:"g:i A" }}
+                            {% else %}
+                                <span class="no-time">-</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="activity-details">
+                            <h3 class="activity-title">{{ card.title }}</h3>
+                            
+                            {% if card.google_place_name and card.google_place_name != card.title %}
+                                <p class="place-name"><i class="fa fa-map-pin"></i> {{ card.google_place_name }}</p>
+                            {% endif %}
+                            
+                            {% if card.address %}
+                                <p class="activity-address"><i class="fa fa-location-arrow"></i> {{ card.address }}</p>
+                            {% endif %}
+                            
+                            {% if card.notes %}
+                                <p class="activity-notes">{{ card.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Hidden form for CSRF token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    // Wait for jsPDF to load
+    window.addEventListener('load', function() {
+        console.log('Page loaded, checking jsPDF...');
+        if (window.jspdf) {
+            console.log('jsPDF is available');
+        } else {
+            console.error('jsPDF failed to load');
+        }
+    });
+    // Global variables
+    const ITINERARY_ID = "{{ itinerary.id }}";
+    let map = null;
+    let markers = [];
+    let infoWindows = [];
+    
+    // Load Google Maps API
+    function loadGoogleMapsAPI() {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDAUVXGHCpvYCMOEYYAwJrxT-YDIBmzffg&libraries=places&callback=initializeMap`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+
+    // Initialize the map
+    function initializeMap() {
+        console.log('Initializing map...');
+        const mapElement = document.getElementById('itineraryMap');
+        if (!mapElement) {
+            console.error('Map element not found!');
+            return;
+        }
+
+        try {
+            map = new google.maps.Map(mapElement, {
+                center: { lat: 13.7563, lng: 100.5018 }, // Bangkok
+                zoom: 12,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+            
+            console.log('Map created successfully');
+            updateMapMarkers();
+        } catch (error) {
+            console.error('Error creating map:', error);
+        }
+    }
+
+    // Update map markers
+    function updateMapMarkers() {
+        console.log('Updating map markers...');
+        if (!map) {
+            console.error('Map not initialized!');
+            return;
+        }
+
+        // Clear existing markers
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+        infoWindows.forEach(infoWindow => infoWindow.close());
+        infoWindows = [];
+
+        const bounds = new google.maps.LatLngBounds();
+        let hasValidMarkers = false;
+
+        // Place cards data from Django template
+        const placeCardsData = [
+            {% for card in place_cards %}
+            {
+                title: "{{ card.title|escapejs }}",
+                date: "{{ card.date|date:'Y-m-d' }}",
+                dayNumber: {{ forloop.counter }},
+                lat: {{ card.latitude|default:"null" }},
+                lng: {{ card.longitude|default:"null" }},
+                address: "{{ card.address|escapejs }}",
+                googlePlaceName: "{{ card.google_place_name|escapejs }}",
+                startTime: "{{ card.start_time|time:'g:i A' }}",
+                endTime: "{{ card.end_time|time:'g:i A' }}",
+                notes: "{{ card.notes|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Create day number mapping
+        const dateList = [
+            {% for date in date_list %}"{{ date|date:'Y-m-d' }}"{% if not forloop.last %},{% endif %}{% endfor %}
+        ];
+
+        // Add markers for each place
+        placeCardsData.forEach((card) => {
+            if (!card.lat || !card.lng) return;
+
+            hasValidMarkers = true;
+            const position = { lat: card.lat, lng: card.lng };
+            
+            // Find day number
+            const dayNumber = dateList.indexOf(card.date) + 1;
+
+            // Create marker
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: card.title,
+                label: {
+                    text: `${dayNumber}`,
+                    color: 'black',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                },
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: getColorForDate(dayNumber),
+                    fillOpacity: 1,
+                    strokeColor: 'black',
+                    strokeWeight: 2,
+                    scale: 15
+                }
+            });
+
+            // Create info window content
+            let infoContent = `
+                <div class="map-info-window">
+                    <h4>Day ${dayNumber}: ${card.title}</h4>
+            `;
+
+            if (card.googlePlaceName && card.googlePlaceName !== card.title) {
+                infoContent += `<p class="place-name">${card.googlePlaceName}</p>`;
+            }
+
+            if (card.startTime || card.endTime) {
+                let timeStr = '';
+                if (card.startTime && card.endTime) {
+                    timeStr = `${card.startTime} - ${card.endTime}`;
+                } else if (card.startTime) {
+                    timeStr = card.startTime;
+                } else if (card.endTime) {
+                    timeStr = `Until ${card.endTime}`;
+                }
+                infoContent += `<p class="time-info">${timeStr}</p>`;
+            }
+
+            if (card.notes) {
+                infoContent += `<p class="notes-info">${card.notes}</p>`;
+            }
+
+            if (card.address) {
+                infoContent += `<p class="address-info">${card.address}</p>`;
+            }
+
+            infoContent += '</div>';
+
+            const infoWindow = new google.maps.InfoWindow({
+                content: infoContent
+            });
+
+            marker.addListener('click', () => {
+                infoWindows.forEach(iw => iw.close());
+                infoWindow.open(map, marker);
+            });
+
+            markers.push(marker);
+            infoWindows.push(infoWindow);
+            bounds.extend(position);
+        });
+
+        // Fit map to show all markers
+        if (hasValidMarkers) {
+            map.fitBounds(bounds);
+            
+            const listener = google.maps.event.addListener(map, "idle", function() {
+                if (map.getZoom() > 16) map.setZoom(16);
+                google.maps.event.removeListener(listener);
+            });
+        }
+    }
+
+    // Get color for date marker
+    function getColorForDate(dateNumber) {
+        const colors = [
+            '#4ECDC4', '#FFEAA7', '#FF6B6B', '#BB8FCE', '#45B7D1', 
+            '#98D8C8', '#FFA07A', '#d35ce0', '#96CEB4', '#F7DC6F'
+        ];
+        return colors[(dateNumber - 1) % colors.length];
+    }
+
+    // PDF Export functionality
+    document.getElementById('exportPdfBtn').addEventListener('click', function() {
+        console.log('PDF button clicked');
+        
+        // Check if jsPDF is loaded
+        if (!window.jspdf) {
+            console.error('jsPDF not found');
+            alert('PDF library is still loading. Please try again in a moment.');
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        
+        try {
+            const pdf = new jsPDF();
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating PDF...';
+            
+            // Add content
+            let y = 20;
+            
+            // Title
+            pdf.setFontSize(20);
+            pdf.text('{{ itinerary.title|escapejs }}', 20, y);
+            y += 15;
+            
+            // Dates
+            pdf.setFontSize(12);
+            pdf.text('{{ itinerary.start_date|date:"F j, Y" }} - {{ itinerary.return_date|date:"F j, Y" }}', 20, y);
+            y += 10;
+            
+            // Location
+            pdf.text('{{ itinerary.destination_city }}, {{ itinerary.destination_country }}', 20, y);
+            y += 15;
+            
+            // Add line
+            pdf.line(20, y, 190, y);
+            y += 15;
+            
+            // Day by day content
+            const pageHeight = pdf.internal.pageSize.height;
+            
+            {% for date in date_list %}
+            // Check for new page
+            if (y > pageHeight - 40) {
+                pdf.addPage();
+                y = 20;
+            }
+            
+            // Day header
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Day {{ forloop.counter }} - {{ date|date:"l, F j, Y" }}', 20, y);
+            y += 10;
+            
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(11);
+            
+            {% for card in place_cards %}
+            {% if card.date|date:'Y-m-d' == date|date:'Y-m-d' %}
+            // Check for new page
+            if (y > pageHeight - 30) {
+                pdf.addPage();
+                y = 20;
+            }
+            
+            // Activity details
+            const activity{{ forloop.counter }} = {
+                time: {% if card.start_time and card.end_time %}'{{ card.start_time|time:"g:i A" }} - \n{{ card.end_time|time:"g:i A" }}'{% elif card.start_time %}'{{ card.start_time|time:"g:i A" }}'{% elif card.end_time %}'Until {{ card.end_time|time:"g:i A" }}'{% else %}'-'{% endif %},
+                title: '{{ card.title|escapejs }}',
+                address: '{{ card.address|escapejs }}',
+                notes: '{{ card.notes|escapejs }}'
+            };
+            
+            // Time
+            pdf.setFont(undefined, 'bold');
+            pdf.text(activity{{ forloop.counter }}.time, 25, y);
+            pdf.setFont(undefined, 'normal');
+            
+            // Title
+            pdf.text(activity{{ forloop.counter }}.title, 60, y);
+            y += 6;
+            
+            // Address
+            if (activity{{ forloop.counter }}.address) {
+                const addr{{ forloop.counter }} = pdf.splitTextToSize(activity{{ forloop.counter }}.address, 130);
+                pdf.text(addr{{ forloop.counter }}, 60, y);
+                y += addr{{ forloop.counter }}.length * 5;
+            }
+            
+            // Notes
+            if (activity{{ forloop.counter }}.notes) {
+                const notes{{ forloop.counter }} = pdf.splitTextToSize(activity{{ forloop.counter }}.notes, 130);
+                pdf.text(notes{{ forloop.counter }}, 60, y);
+                y += notes{{ forloop.counter }}.length * 5;
+            }
+            
+            y += 8;
+            {% endif %}
+            {% endfor %}
+            
+            y += 5;
+            {% endfor %}
+            
+            // Generate filename
+            const fileName = '{{ itinerary.title|escapejs }}'.replace(/[^a-zA-Z0-9 ]/g, '').replace(/ /g, '_') + '_itinerary.pdf';
+            
+            // Save the PDF
+            pdf.save(fileName);
+            
+            console.log('PDF saved successfully');
+            
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Error generating PDF: ' + error.message);
+        } finally {
+            // Restore button
+            this.disabled = false;
+            this.innerHTML = '<i class="fa fa-file-pdf-o"></i> Export as PDF';
+        }
+    });
+
+    // Load the map when page loads
+    loadGoogleMapsAPI();
+</script>
+
+{% endblock %}

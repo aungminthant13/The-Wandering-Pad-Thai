@@ -1,23 +1,46 @@
 {% extends 'user_auth/base.html' %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-6">Login</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <div class="space-y-4">
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to your account</p>
+        </div>
+        
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
             {% for field in form %}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                        {% for error in field.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <span class="helptext">{{ field.help_text }}</span>
                     {% endif %}
                 </div>
             {% endfor %}
+            
+            <button type="submit" class="auth-submit-btn">Sign In</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p class="auth-footer-text">
+                Don't have an account? 
+                <a href="{% url 'signup' %}" class="auth-footer-link">Create one here</a>
+            </p>
         </div>
-        <button type="submit" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Login</button>
-    </form>
-    <p class="mt-4 text-sm">Don't have an account? <a href="{% url 'signup' %}" class="text-blue-500">Sign up</a></p>
+    </div>
 </div>
 {% endblock %}

@@ -1,0 +1,435 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgb(251, 248, 238);
+}
+
+/* Navbar container */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: white;
+}
+
+/* Logo section */
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.logo-text {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* remove colored link */
+a:link,
+a:visited,
+a:hover,
+a:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.user-acc-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px solid #006b71;
+    border-radius: 25px;
+    color: #006B71;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s;
+    margin-left: 10px;
+}
+
+.user-acc-button:hover {
+    background-color: #006B71;
+    color: white;
+}
+
+/* Trip Header Section */
+.trip-header {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: white;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.trip-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.trip-dates {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.trip-location {
+    font-size: 16px;
+    color: #888;
+}
+
+.trip-dates i,
+.trip-location i {
+    margin-right: 8px;
+    color: #006b71;
+}
+
+/* Export Section */
+.export-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.export-btn {
+    background-color: #006b71;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.export-btn:hover {
+    background-color: #005559;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.export-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.export-btn i {
+    margin-right: 8px;
+}
+
+/* Map Section */
+.map-section {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.map-container {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    overflow: hidden;
+    height: 500px;
+    position: relative;
+}
+
+.itinerary-map {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Map info window styles */
+.map-info-window {
+    padding: 10px;
+    min-width: 200px;
+}
+
+.map-info-window h4 {
+    margin: 0 0 10px 0;
+    color: #006b71;
+    font-size: 16px;
+}
+
+.map-info-window .place-name {
+    font-weight: 600;
+    color: #333;
+    margin: 5px 0;
+}
+
+.map-info-window .time-info {
+    color: #666;
+    font-size: 14px;
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.map-info-window .notes-info {
+    color: #333;
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.map-info-window .address-info {
+    color: #888;
+    font-size: 12px;
+    margin: 5px 0;
+    font-style: italic;
+}
+
+/* Itinerary Section */
+.itinerary-section {
+    max-width: 900px;
+    margin: 0 auto 50px;
+    padding: 0 20px;
+}
+
+.itinerary-content {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+/* Day Section */
+.day-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.day-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.day-number {
+    background-color: rgb(247, 232, 178);
+    color: rgb(0, 0, 0);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.day-date {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Activity Items */
+.day-activities {
+    margin-left: 20px;
+}
+
+.activity-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border-left: 4px solid #006b71;
+}
+
+.activity-item:last-child {
+    margin-bottom: 0;
+}
+
+.activity-time {
+    min-width: 120px;
+    font-weight: 600;
+    color: #006b71;
+    font-size: 14px;
+    padding-top: 2px;
+}
+
+.activity-time .no-time {
+    color: #999;
+    font-weight: normal;
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.place-name {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.activity-address {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.activity-notes {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.activity-details i {
+    margin-right: 6px;
+    color: #006b71;
+    font-size: 12px;
+}
+
+.no-activities {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .trip-title {
+        font-size: 28px;
+    }
+    
+    .day-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .activity-item {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .activity-time {
+        min-width: auto;
+    }
+    
+    .day-activities {
+        margin-left: 0;
+    }
+    
+    .itinerary-content {
+        padding: 20px;
+    }
+}
+
+/* Print styles for better PDF export */
+@media print {
+    body {
+        background-color: white;
+    }
+    
+    .navbar,
+    .export-section,
+    .map-section {
+        display: none;
+    }
+    
+    .trip-header {
+        box-shadow: none;
+        page-break-after: avoid;
+    }
+    
+    .itinerary-content {
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    .day-section {
+        page-break-inside: avoid;
+    }
+    
+    .activity-item {
+        page-break-inside: avoid;
+    }
+}
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: lightgray;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle.active {
+  background-color: #8cd820; /* or your preferred color */
+}
+
+.line {
+  width: 40px;
+  height: 4px;
+  background-color: lightgray;
+}
+
+.line.active {
+  background-color: #2563eb;
+}
+
+.label {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #333;
+}
+
+
