@@ -60,9 +60,9 @@ body {
 .itinerary-history{
   display: inline-block;
   padding: 10px 20px;
-  border: 2px solid #006b71;
+  border: 2px solid #b25e39;
   border-radius: 25px;
-  color: #006B71;
+  color: #473D3A;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -71,16 +71,16 @@ body {
 }
 
 .itinerary-history:hover {
-  background-color: #006b71;
+  background-color: #b25e39;
   color: white;
 }
 
 .user-logout-button {
   position: relative;
   background: none;
-  border: 2px solid #006b71;
+  border: 2px solid #b25e39;
   border-radius: 25px;
-  color: #006b71;
+  color: #473D3A;
   font-size: 14px;
   font-weight: 500;
   padding: 10px 30px; /* wider padding */
@@ -182,7 +182,7 @@ h1 {
 .trip-form {
   background-color: white;
   border-radius: 12px;
-  border: 2px solid #006b71;
+  border: 2px solid #b25e39;
   margin-bottom: 30px;
   overflow: hidden;
   width: 50%;
@@ -232,7 +232,7 @@ h1 {
 }
 
 .trip-get-started-btn {
-  background-color: #00766c; /* Teal color for button */
+  background-color: #b25e39; /* Teal color for button */
   color: white;
   border: none;
   padding: 15px 35px;
@@ -246,7 +246,7 @@ h1 {
 }
 
 .trip-get-started-btn:hover {
-  background-color: #005a50;
+  background-color: #473D3A;
 }
 
 
