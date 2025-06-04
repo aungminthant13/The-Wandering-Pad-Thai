@@ -6,7 +6,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: rgb(251, 248, 238);
+    background-color: #fcf9e9;
 }
 
 /* Navbar container */
@@ -44,9 +44,9 @@ a:active {
 .user-acc-button {
     display: inline-block;
     padding: 10px 20px;
-    border: 2px solid #006b71;
+    border: 2px solid #b25e39;
     border-radius: 25px;
-    color: #006B71;
+    color: #b25e39;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -55,7 +55,7 @@ a:active {
 }
 
 .user-acc-button:hover {
-    background-color: #006B71;
+    background-color: #b25e39;
     color: white;
 }
 
@@ -89,7 +89,7 @@ a:active {
 .trip-dates i,
 .trip-location i {
     margin-right: 8px;
-    color: #006b71;
+    color: #b25e39;
 }
 
 /* Export Section */
@@ -99,7 +99,7 @@ a:active {
 }
 
 .export-btn {
-    background-color: #006b71;
+    background-color: #b25e39;
     color: white;
     border: none;
     padding: 12px 30px;
@@ -112,7 +112,7 @@ a:active {
 }
 
 .export-btn:hover {
-    background-color: #005559;
+    background-color: #924c2e;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -166,7 +166,7 @@ a:active {
 
 .map-info-window h4 {
     margin: 0 0 10px 0;
-    color: #006b71;
+    color: #b25e39;
     font-size: 16px;
 }
 
@@ -257,7 +257,7 @@ a:active {
     padding: 15px;
     background-color: #f9f9f9;
     border-radius: 10px;
-    border-left: 4px solid #006b71;
+    border-left: 4px solid #b25e39;
 }
 
 .activity-item:last-child {
@@ -267,7 +267,7 @@ a:active {
 .activity-time {
     min-width: 120px;
     font-weight: 600;
-    color: #006b71;
+    color: #b25e39;
     font-size: 14px;
     padding-top: 2px;
 }
@@ -312,7 +312,7 @@ a:active {
 
 .activity-details i {
     margin-right: 6px;
-    color: #006b71;
+    color: #b25e39;
     font-size: 12px;
 }
 

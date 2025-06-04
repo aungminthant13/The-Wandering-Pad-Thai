@@ -37,7 +37,7 @@ a:active {
 .auth-card {
     background-color: white;
     border-radius: 20px;
-    border: 2px solid #006b71;
+    border: 2px solid #b25e39;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 40px;
     width: 100%;
@@ -96,7 +96,7 @@ a:active {
 
 .form-input:focus {
     outline: none;
-    border-color: #006b71;
+    border-color: #b25e39;
     box-shadow: 0 0 0 3px rgba(0, 107, 113, 0.1);
     background-color: white;
 }
@@ -116,7 +116,7 @@ a:active {
 /* Submit button */
 .auth-submit-btn {
     width: 100%;
-    background-color: #006b71;
+    background-color: #b25e39;
     color: white;
     border: none;
     padding: 15px 20px;
@@ -129,7 +129,7 @@ a:active {
 }
 
 .auth-submit-btn:hover {
-    background-color: #005559;
+    background-color: #a35635;
     transform: translateY(-1px);
 }
 
@@ -151,14 +151,14 @@ a:active {
 }
 
 .auth-footer-link {
-    color: #006b71;
+    color: #473D3A;
     font-weight: 500;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .auth-footer-link:hover {
-    color: #005559;
+    color: #473D3A;
     text-decoration: underline;
 }
 
@@ -255,7 +255,7 @@ a:active {
 .auth-footer-link:focus,
 .form-input:focus,
 .auth-submit-btn:focus {
-    outline: 2px solid #006b71;
+    outline: 2px solid #473D3A;
     outline-offset: 2px;
 }
 
@@ -285,7 +285,7 @@ a:active {
 
 .form-group input:focus {
     outline: none;
-    border-color: #006b71;
+    border-color: #b25e39;
     box-shadow: 0 0 0 3px rgba(0, 107, 113, 0.1);
     background-color: white;
 }
@@ -304,7 +304,7 @@ a:active {
 
 .auth-form input:focus {
     outline: none;
-    border-color: #006b71;
+    border-color: #b25e39;
     box-shadow: 0 0 0 3px rgba(0, 107, 113, 0.1);
     background-color: white;
 }

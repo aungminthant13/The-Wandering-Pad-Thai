@@ -6,7 +6,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: rgb(251, 248, 238);
+    background-color: #fcf9e9;
 }
 
 /* Navbar container */
@@ -43,9 +43,9 @@ a:active {
 .user-acc-button {
   display: inline-block;
   padding: 10px 20px;
-  border: 2px solid #006b71; /* Teal border */
+  border: 2px solid #b25e39;
   border-radius: 25px;
-  color: #006B71;
+  color: #b25e39;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -55,7 +55,7 @@ a:active {
 }
 
 .user-acc-button:hover {
-  background-color: #006B71;
+  background-color: #b25e39;
   color: white;
 }
 
@@ -114,7 +114,7 @@ a:active {
 }
 
 .save-status.saved {
-    background-color: #d4edda;
+    background-color: #d4f1da;
     color: #155724;
     border-color: #c3e6cb;
 }
@@ -185,7 +185,7 @@ a:active {
     transform: translateY(-50%);
     width: 50%;
     height: calc(100% - 8px);
-    background-color: #006b71;
+    background-color: #b25e39;
     border-radius: 25px;
     transition: transform 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -233,7 +233,7 @@ a:active {
 
 .map-info-window h4 {
     margin: 0 0 10px 0;
-    color: #006b71;
+    color: #b25e39;
     font-size: 16px;
 }
 
@@ -438,12 +438,12 @@ a:active {
 }
 
 #placeCardForm button[type="submit"] {
-    background-color: #006b71;
+    background-color: #b25e39;
     color: white;
 }
 
 #placeCardForm button[type="submit"]:hover {
-    background-color: #005559;
+    background-color: #9c5131
 }
 
 #placeCardForm button[type="button"] {
@@ -558,7 +558,7 @@ a:active {
 }
 
 .place_card strong {
-    color: #006b71;
+    color: #b25e39;
     font-size: 16px;
 }
 
@@ -648,7 +648,7 @@ a:active {
 
 #placeSearchInput:focus {
     outline: none;
-    border-color: #006b71;
+    border-color: #b25e39;
 }
 
 .place-search-results {
@@ -760,6 +760,6 @@ a:active {
 
 /* Style the time display in place cards */
 .place_card .time-span {
-    color: #205355;
+    color: #8a3f1a;
     font-weight: 500;
 }
