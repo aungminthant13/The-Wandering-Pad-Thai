@@ -2,6 +2,7 @@
 {% block title %}Edit Itinerary{% endblock %}
 
 {% block content %}
+{% load static %}
 
 {% block css %} 
 <link rel="stylesheet" href="/static/itinerary/css/edit_itinerary_styles.css" />
@@ -9,16 +10,50 @@
 {% endblock %}
 
 <!-- navbar -->
+<!-- <nav class="navbar">
+    <div class="logo">
+      <a href="{% url 'home' %}"><span class="logo-text">The Wandering Pad Thai</span></a>
+    </div>
+
+    <div class="nav-center">
+        <img src="{% static 'itinerary/photo/progressbar_addPlaces.png' %}" alt="Progress Bar"
+            style="width: 100%; max-width: 300px; margin: 0 auto; display: block;" />
+    </div>
+ 
+    <div class="user-acc">
+        <a href="{% url 'itinerary:save_itinerary' itinerary.id %}" class="user-acc-button">Next →</a>  
+    </div>
+</nav> -->
+
+    <!-- <nav class="navbar">
+        <div class="logo">
+            <a href="{% url 'home' %}"><span class="logo-text">The Wandering Pad Thai</span></a>
+        </div>
+
+        <div class="nav-center">
+            <div style="width: 300px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                <img src="{% static 'itinerary/photo/progressbar_addPlaces.png' %}" alt="Progress Bar"/>
+            </div>
+        </div>
+     
+        <div class="user-acc">
+            <a href="{% url 'itinerary:save_itinerary' itinerary.id %}" class="user-acc-button">Next →</a>  
+        </div>
+    </nav> -->
+
 <nav class="navbar">
     <div class="logo">
-      <a href="{% url 'home' %}"
-        ><span class="logo-text">The Wandering Pad Thai</span></a
-      >
+        <a href="{% url 'home' %}">
+            <span class="logo-text">The Wandering Pad Thai</span>
+        </a>
     </div>
-    
-    <div class="user-acc">
-        <a href="{% url 'itinerary:save_itinerary' itinerary.id %}" class="user-acc-button">Next →</a>
-        
+
+    <div class="progress-bar">
+        <img src="{% static 'itinerary/photo/progressbar_addPlaces.png' %}" alt="Progress Bar"/>
+    </div>
+
+    <div class="navbar-right user-acc-button">
+        <a href="{% url 'itinerary:save_itinerary' itinerary.id %}">Next →</a>
     </div>
 </nav>
 

@@ -3,6 +3,9 @@
 
 {% block content %}
 
+{% load static %}
+
+
 <nav class="navbar">
   <!-- Left: User name -->
   <!-- <div class="navbar-left">
@@ -34,22 +37,13 @@
 
 <!-- trip form section -->
 <section class="trip-form-section">
-      <!-- <div class="progress-bar">
-        <div class="step">
-            <div class="circle">1</div>
-            <div class="label">Create</div>
-        </div>
-        <div class="line"></div>
-        <div class="step">
-            <div class="circle">2</div>
-            <div class="label">Add Places</div>
-        </div>
-        <div class="line active"></div>
-        <div class="step">
-            <div class="circle active">3</div>
-            <div class="label">Save</div>
-        </div>
-    </div> -->
+  <!-- Progress bar -->
+  <img src="{% static 'home/photo/progressbar_create.png' %}" alt="Progress Bar"
+     style="width: 100%; max-width: 300px; margin: 0 auto 32px auto; display: block;" />
+
+
+
+
 
   <div class="trip-form-section-content">
     <div class="trip-form">
@@ -83,6 +77,17 @@
       <div class="trip-duration">
         <div class="label">Trip Duration</div>
         <div id="tripDurationValue">0 days</div>
+      </div>
+
+      <div class="trip-description-section">
+        <div class="label">Description</div>
+        <div class="input-field">
+          <textarea
+            id="tripDescription"
+            placeholder="Add a description for your trip (optional)"
+            rows="3"
+          ></textarea>
+        </div>
       </div>
     </div>
 
@@ -147,6 +152,7 @@
       .getElementById("getStartedBtn")
       .addEventListener("click", function () {
         let tripTitle = document.getElementById("tripTitle").value;
+        let tripDescription = document.getElementById("tripDescription").value;
         let startDate = document.getElementById("startDate").value;
         let returnDate = document.getElementById("returnDate").value;
         let tripDurationText =
@@ -176,6 +182,7 @@
           },
           body: JSON.stringify({
             trip_title: tripTitle,
+            description: tripDescription,
             start_date: startDate,
             return_date: returnDate,
           }),

@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from datetime import timedelta
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -378,5 +378,12 @@ def update_itinerary(request, itinerary_id):
         })
 
 
-# Add this URL pattern to your urls.py
-# path('itinerary/<int:itinerary_id>/update/', views.update_itinerary, name='update_itinerary'),
+# In your views.py
+from django.shortcuts import redirect, get_object_or_404
+
+def delete_itinerary(request, itinerary_id):
+    if request.method == 'POST':
+        itinerary = get_object_or_404(Itineraries, id=itinerary_id, user=request.user)
+        itinerary.delete()
+        return redirect('trips')  # redirect to trips.html
+    return redirect('trips')

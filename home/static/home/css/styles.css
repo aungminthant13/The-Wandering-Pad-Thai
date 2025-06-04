@@ -200,6 +200,27 @@ h1 {
   outline: none;
 }
 
+/* New description section styles */
+.trip-description-section {
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#tripDescription {
+  width: 100%;
+  border: none;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  resize: none;
+  min-height: 60px;
+  color: #333;
+}
+
+#tripDescription:focus {
+  outline: none;
+}
+
 .dates-container {
   display: flex;
 }
@@ -227,8 +248,17 @@ h1 {
   color: #333;
 }
 
+.input-field input[type="text"],
+.input-field input[type="date"] {
+  width: 100%;
+  border: none;
+  font-size: 16px;
+  color: #333;
+}
+
 .trip-duration {
   padding: 20px;
+  border-bottom: 1px solid #e1e1e1;
 }
 
 .trip-get-started-btn {
@@ -247,6 +277,60 @@ h1 {
 
 .trip-get-started-btn:hover {
   background-color: #473D3A;
+}
+
+
+/* Progress Bar Styles */
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0; /* we'll control spacing within step-container */
+  margin: 12px 0;
+}
+
+.step-container {
+  display: flex;
+  align-items: center;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: lightgray;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle.active {
+  background-color: #8cd820;
+}
+
+.line {
+  width: 40px;
+  height: 4px;
+  background-color: lightgray;
+  margin: 0 10px;
+}
+
+.line.active {
+  background-color: #2563eb;
+}
+
+.label {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #333;
 }
 
 
@@ -276,51 +360,27 @@ h1 {
       border-right: none;
       border-bottom: 1px solid #e1e1e1;
   }
-}
 
+  .trip-form {
+    width: 90%;
+  }
 
-.progress-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin: 12px 0;
-}
+  .progress-bar {
+    gap: 0;
+    padding: 0 10px;
+  }
 
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .line {
+    width: 40px;
+  }
 
-.circle {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: lightgray;
-  color: white;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .circle {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
 
-.circle.active {
-  background-color: #8cd820; /* or your preferred color */
-}
-
-.line {
-  width: 40px;
-  height: 4px;
-  background-color: lightgray;
-}
-
-.line.active {
-  background-color: #2563eb;
-}
-
-.label {
-  margin-top: 4px;
-  font-size: 0.75rem;
-  color: #333;
+  .step .label {
+    font-size: 12px;
+  }
 }

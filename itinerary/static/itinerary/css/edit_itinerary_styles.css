@@ -11,11 +11,16 @@ body {
 
 /* Navbar container */
 .navbar {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     padding: 15px 30px;
     border-bottom: 1px solid #f0f0f0;
+    background-color: white;
+}
+
+.nav-center {
+    justify-self: center;
 }
 
 /* Logo section */
@@ -24,6 +29,7 @@ body {
     align-items: center;
     font-size: 24px;
     font-weight: bold;
+    justify-self: start;
 }
 
 .logo-text {
@@ -40,6 +46,20 @@ a:active {
     text-decoration: none;
 }
 
+/* .user-acc-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px solid #b25e39;
+    border-radius: 25px;
+    color: #b25e39;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s;
+    margin-left: 10px;
+    justify-self: end;
+} */
+
 .user-acc-button {
   display: inline-block;
   padding: 10px 20px;
@@ -51,12 +71,13 @@ a:active {
   font-weight: 500;
   transition: background-color 0.3s, color 0.3s;
   margin-left: 10px;
+  justify-self: end;
   /* margin-right: 10px; */
 }
 
 .user-acc-button:hover {
-  background-color: #b25e39;
-  color: white;
+    background-color: #b25e39;
+    color: white;
 }
 
 
